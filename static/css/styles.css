@@ -1,0 +1,38 @@
+@font-face {
+    font-family: 'Minecraft';
+    src: url('../fonts/Minecraft.ttf') format('truetype');
+}
+
+body {
+    font-family: 'Minecraft', sans-serif;
+    background: url('../background.jpg') no-repeat center center fixed !important;
+    background-size: cover !important;
+    color: #fff; 
+}
+
+.dice {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 20px;
+    background-color: #30114d;
+    color: #d83f16;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 48px;
+    border: 5px solid #000;
+}
+
+.button {
+    padding: 10px 20px;
+    background-color: #30114d;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    font-family: 'Minecraft';
+}
+
+.button:hover {
+    background-color: #888;
+}
