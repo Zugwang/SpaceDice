@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}SpaceDice Roller{% endblock %}
+
+{% block content %}
+<div class="box">
+    <h1 class="title">SpaceDice Roller</h1>
+    <div class="dice" id="dice">?</div>
+    <div class="select">
+        <select id="dice-type">
+            <option value="6">6-sided dice</option>
+            <option value="10">10-sided dice</option>
+            <option value="20">20-sided dice</option>
+        </select>
+    </div>
+    <button class="button is-primary" id="roll-button">Roll SpaceDice</button>
+</div>
+
+<script>
+    // Function to fetch data on page load
+    function fetchData() {
+        fetch('/get-data')
+            .then(response => response.json())
+            .then(data => {
+                console.log(data.message);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+
+    document.addEventListener('DOMContentLoaded', fetchData);
+
+    document.getElementById('roll-button').addEventListener('click', function() {
+        const diceType = document.getElementById('dice-type').value;
+        fetch(`/roll-dice?dice_type=${diceType}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.random_number !== undefined) {
+                    document.getElementById('dice').textContent = data.random_number;
+                } else {
+                    document.getElementById('dice').textContent = '?';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    });
+</script>
+{% endblock %}

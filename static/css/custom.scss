@@ -1,0 +1,99 @@
+// Import Bulma framework (Sass version)
+@import '~bulma/css/bulma.css';
+
+// Define your custom color variables
+$light-purple: #8d8dc1;
+$dark-purple: #5a5977;
+$light-blue: #b3cadc;
+$light-brown: #937c5a;
+
+
+$primary: $light-purple;
+$link-color: $light-blue;
+
+
+// Your custom styles
+@font-face {
+    font-family: 'Minecraft';
+    src: url('../fonts/Minecraft.ttf') format('truetype');
+}
+
+body {
+    font-family: 'Minecraft', sans-serif;
+    background: url('../images/background/wallhaven.jpg') no-repeat center center fixed;
+    background-size: cover;
+    color: $light-blue;
+}
+
+.hero-title {
+    color: $light-blue;
+    font-size: 68px;
+}
+
+.hero-subtitle {
+    color: $dark-purple;
+}
+
+.dice {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 20px;
+    background-color: $dark-purple; // Use your custom main color variable
+    color: $light-purple; // Lighten the text color for contrast
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 48px;
+    border: 5px solid #000;
+}
+
+.button {
+    padding: 10px 20px;
+    background-color: $light-purple; // Use your custom main color variable
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    font-family: 'Minecraft';
+}
+
+.button:hover {
+    background-color: $light-blue; // Darken the color on hover for contrast
+}
+
+.top-banner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 1rem;
+}
+
+.github-logo, .doc-link, .homepage-link {
+    color: $light-purple;
+    font-size: 44px;
+}
+
+.github-logo:hover, .doc-link:hover, .homepage-link:hover {
+    color: $light-blue;
+}
+
+.top-banner .title {
+    font-size: 30px; // Ensure it is set to 30px if additional customization is needed
+    color: $light-purple; // Retain the custom color
+}
+
+// Doc content specific styles
+.doc-content {
+    h1, h2, h3, h4, h5, h6, p, ul, ol, li, blockquote {
+        color: $light-blue;
+    }
+}
+
+.doc-images {
+    max-width: 100%;
+    height: 150px;
+}
+
+.home-padding-top {
+    padding-top: 125px;
+}

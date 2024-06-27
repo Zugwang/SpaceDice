@@ -5,7 +5,7 @@
 
 body {
     font-family: 'Minecraft', sans-serif;
-    background: url('../background.jpg') no-repeat center center fixed !important;
+    background: url('../background/wallhaven.jpg') no-repeat center center fixed !important;
     background-size: cover !important;
     color: #fff; 
 }

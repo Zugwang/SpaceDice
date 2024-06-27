@@ -2,9 +2,10 @@ import requests
 import json
 import os
 import hashlib
+import markdown
 from secrets import SystemRandom
 from dotenv import load_dotenv
-from flask import Flask, render_template, jsonify, redirect, url_for
+from flask import Flask, render_template, jsonify, request
 
 load_dotenv()
 
@@ -30,16 +31,15 @@ interplanetary_shock_api_url = "https://api.nasa.gov/DONKI/IPS?api_key=DEMO_KEY"
 # don't understand at all those fucking scientist
 magnetopause = "https://api.nasa.gov/DONKI/MPC?api_key=DEMO_KEY"
 
-def Call_api(api_url):
-    response = requests.get(api_url) 
-
-    if response.status_code == 200:
-        api_data = json.loads(response.text)
-        return api_data 
+data_filename = 'neows_data.json'
 
 def save_data_to_file(data, filename):
     with open(filename, 'w') as f:
         json.dump(data, f , indent=2)
+
+def load_data_from_file(filename):
+    with open(filename, 'r') as f:
+        return json.load(f)
 
 def remove_decimal_point(num):
     # Convert the float to a string
@@ -73,56 +73,63 @@ def csprng_rnd(seed, lower_bound, upper_bound):
     sys_random.seed(seed)  # Seed the random number generator
     return sys_random.randint(lower_bound, upper_bound)
 
+def format_neos(data_dict):
+    neos_formatted = []
+    for date in data_dict["near_earth_objects"]:
+        for neo in data_dict["near_earth_objects"][date]:
+            diameter_seed_min = neo['estimated_diameter']['meters']['estimated_diameter_min']
+            diameter_seed_max = neo['estimated_diameter']['meters']['estimated_diameter_max']
+            diameter_seed_str = remove_decimal_point(diameter_seed_min*diameter_seed_max)
+            format_neo = {
+                "neo_name": neo["name"],
+                "is_potentially_hazardous": neo["is_potentially_hazardous_asteroid"],
+                "estimated_diameter_min": diameter_seed_min,
+                "estimated_diameter_max": diameter_seed_max,
+                "seed": generate_seed(diameter_seed_str),
+            }
+            neos_formatted.append(format_neo)
+    return neos_formatted
+
+def dice_result(all_neos, dice_type):
+    random_neo = SystemRandom().choice(all_neos)
+    return csprng_rnd(random_neo["seed"], 1, dice_type) 
+
 @app.route('/')
 def home():
     return render_template('home.html')
 
 @app.route('/dice')
 def dice():
-    return render_template('index.html')
+    return render_template('dice.html')
+
+@app.route('/doc')
+def doc():
+    with open('static/docs/doc.md', 'r') as markdown_file:
+        doc_content = markdown_file.read()
+        doc_content_html = markdown.markdown(doc_content)
+    return render_template('doc.html', doc_content=doc_content_html)
+
+@app.route('/get-data', methods=['GET'])
+def get_data():
+    data_dict = call_api(neoWs_api_url_today)
+    save_data_to_file(data_dict, data_filename)
+    return jsonify({'message': 'Data fetched and stored successfully'})
 
 @app.route('/roll-dice', methods=['GET'])
 def roll_dice():
-    data_dict = call_api(neoWs_api_url_today)
-    for date in data_dict["near_earth_objects"]:
-        for neo in data_dict["near_earth_objects"][date]:
-            diameter_seed = neo['estimated_diameter']['meters']['estimated_diameter_min']
-            diameter_seed *= neo['estimated_diameter']['meters']['estimated_diameter_max']
-            diameter_seed_str = remove_decimal_point(diameter_seed)
-            seed = generate_seed(diameter_seed_str)
-            random_number = csprng_rnd(seed, 1, 6)  # For a 6-sided dice
-            return jsonify({'random_number': random_number})
-    return jsonify({'error': 'No NEOs found'})
+    dice_type = int(request.args.get('dice_type', 6))  # Default to 6-sided dice if not specified
+    try:
+        data_dict = load_data_from_file(data_filename)
+    except FileNotFoundError:
+        get_data()
+        data_dict = load_data_from_file(data_filename)
+        
+    all_neos = format_neos(data_dict)
+    roll = dice_result(all_neos, dice_type)
+    return jsonify({'random_number': roll})
 
 
 if __name__ == "__main__":
     app.run(debug=True)
 
 
-
-# if __name__ == "__main__":
-#     print("Hello space!")
-#     data_dict = Call_api(neoWs_api_url_today.replace("DEMO_KEY", nasa_api_key))
-#     save_data_to_file(data_dict, 'neoWs_data.json')
-
-#     print("Count: "+str(data_dict["element_count"]))
-
-#     for date in data_dict["near_earth_objects"]:
-#         for neo in data_dict["near_earth_objects"][date]:
-#             if neo['is_potentially_hazardous_asteroid']:
-#                 hazardousness = 'HAZARDOUS'
-#             else:
-#                 hazardousness = 'Safe'
-#             print(f"Name: {neo['name']}")
-#             diameter_seed = neo['estimated_diameter']['meters']['estimated_diameter_min']
-#             diameter_seed *= neo['estimated_diameter']['meters']['estimated_diameter_max']
-
-#             diameter_seed_str = remove_decimal_point(diameter_seed)
-#             print(diameter_seed_str)
-
-#             # Generate a secure seed using the hashed diameter_seed_str
-#             seed = generate_seed(diameter_seed_str)
-#             print(f"Secure seed: {seed}")
-
-#             random_number = csprng_rnd(seed, 1, 10)
-#             print(f"Random Number: {random_number}")

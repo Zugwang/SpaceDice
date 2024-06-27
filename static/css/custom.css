@@ -1,0 +1,83 @@
+@import '~bulma/css/bulma.css';
+@font-face {
+  font-family: "Minecraft";
+  src: url("../fonts/Minecraft.ttf") format("truetype");
+}
+body {
+  font-family: "Minecraft", sans-serif;
+  background: url("../images/background/wallhaven.jpg") no-repeat center center fixed;
+  background-size: cover;
+  color: #b3cadc;
+}
+
+.hero-title {
+  color: #b3cadc;
+  font-size: 48px;
+}
+
+.hero-subtitle {
+  color: #5a5977;
+}
+
+.dice {
+  width: 100px;
+  height: 100px;
+  margin-bottom: 20px;
+  background-color: #5a5977;
+  color: #8d8dc1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 48px;
+  border: 5px solid #000;
+}
+
+.button {
+  padding: 10px 20px;
+  background-color: #8d8dc1;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  font-family: "Minecraft";
+}
+
+.button:hover {
+  background-color: #b3cadc;
+}
+
+.top-banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 1rem;
+}
+
+.github-logo, .doc-link, .homepage-link {
+  color: #8d8dc1;
+  font-size: 44px;
+}
+
+.github-logo:hover, .doc-link:hover, .homepage-link:hover {
+  color: #b3cadc;
+}
+
+.top-banner .title {
+  font-size: 30px;
+  color: #8d8dc1;
+}
+
+.doc-content h1, .doc-content h2, .doc-content h3, .doc-content h4, .doc-content h5, .doc-content h6, .doc-content p, .doc-content ul, .doc-content ol, .doc-content li, .doc-content blockquote {
+  color: #b3cadc;
+}
+
+.doc-images {
+  max-width: 100%;
+  height: 150px;
+}
+
+.home-padding-top {
+  padding-top: 125px;
+}
+
+/*# sourceMappingURL=custom.css.map */

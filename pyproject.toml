@@ -12,6 +12,10 @@ python-dotenv = "^1.0.1"
 tk = "^0.1.0"
 flask = "^3.0.3"
 kivy = "^2.3.0"
+numpy = "^2.0.0"
+scipy = "^1.14.0"
+statsmodels = "^0.14.2"
+markdown = "^3.6"
 
 
 [build-system]

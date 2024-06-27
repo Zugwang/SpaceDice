@@ -1,25 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SpaceDice Home</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-</head>
-<body>
-    <section class="hero is-fullheight">
-        <div class="hero-body">
-            <div class="container has-text-centered">
-                <h1 class="title">
-                    Welcome to SpaceDice
-                </h1>
-                <h2 class="subtitle">
-                    Roll a cosmic dice
-                </h2>
-                <a href="{{ url_for('dice') }}" class="button is-large">Go to Dice Roller</a>
-            </div>
-        </div>
-    </section>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block title %}SpaceDice Home{% endblock %}
+
+{% block content %}
+<div class="container has-text-centered home-padding-top">
+    <h1 class="title hero-title">Welcome to SpaceDice</h1>
+    <a href="{{ url_for('dice') }}" class="button is-large">Go to Dice Roller</a>
+</div>
+{% endblock %}
