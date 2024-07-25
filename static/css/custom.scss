@@ -37,7 +37,7 @@ body {
 .dice {
     width: 100px;
     height: 100px;
-    margin-bottom: 20px;
+    margin: 20px auto;
     background-color: $dark-purple; // Use your custom main color variable
     color: $light-purple; // Lighten the text color for contrast
     display: flex;
@@ -96,4 +96,18 @@ body {
 
 .home-padding-top {
     padding-top: 125px;
+}
+
+.box {
+    margin: 0 auto;
+    max-width: 400px;
+    background-color: rgba(255, 255, 255, 0.3); /* Transparent background */
+}
+
+.hero .box {
+    margin-top: 1rem; /* Adjust margin-top to position it just after the banner */
+}
+
+.select.is-rounded {
+    margin-bottom: 20px;
 }

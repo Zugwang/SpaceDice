@@ -12,7 +12,7 @@ body {
 
 .hero-title {
   color: #b3cadc;
-  font-size: 48px;
+  font-size: 68px;
 }
 
 .hero-subtitle {
@@ -22,7 +22,7 @@ body {
 .dice {
   width: 100px;
   height: 100px;
-  margin-bottom: 20px;
+  margin: 20px auto;
   background-color: #5a5977;
   color: #8d8dc1;
   display: flex;
@@ -78,6 +78,20 @@ body {
 
 .home-padding-top {
   padding-top: 125px;
+}
+
+.box {
+  margin: 0 auto;
+  max-width: 400px;
+  background-color: rgba(255, 255, 255, 0.3); /* Transparent background */
+}
+
+.hero .box {
+  margin-top: 1rem; /* Adjust margin-top to position it just after the banner */
+}
+
+.select.is-rounded {
+  margin-bottom: 20px;
 }
 
 /*# sourceMappingURL=custom.css.map */

@@ -3,17 +3,24 @@
 {% block title %}SpaceDice Roller{% endblock %}
 
 {% block content %}
-<div class="box">
-    <h1 class="title">SpaceDice Roller</h1>
-    <div class="dice" id="dice">?</div>
-    <div class="select">
-        <select id="dice-type">
-            <option value="6">6-sided dice</option>
-            <option value="10">10-sided dice</option>
-            <option value="20">20-sided dice</option>
-        </select>
+<div class="container has-text-centered">
+    <div class="box">
+        <h1 class="title is-primary">SpaceDice Roller</h1>
+        <div class="dice" id="dice">?</div>
+        <div class="control has-icons-left">
+            <div class="select is-rounded">
+                <select id="dice-type">
+                    <option selected value="20">20-sided dice</option>
+                    <option value="10">10-sided dice</option>
+                    <option value="6">6-sided dice</option>
+                </select>
+            </div>
+            <div class="icon is-small is-left">
+                <i class="fas fa-dice-d20"></i>
+            </div>
+        </div>
+        <button class="button is-primary" id="roll-button">Roll SpaceDice</button>
     </div>
-    <button class="button is-primary" id="roll-button">Roll SpaceDice</button>
 </div>
 
 <script>
