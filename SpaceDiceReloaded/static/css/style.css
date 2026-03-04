@@ -1,0 +1,915 @@
+/* SpaceDice Reloaded - Multi-Theme System */
+
+/* ========== FONTS ========== */
+@font-face {
+    font-family: 'Silkscreen';
+    src: url('../fonts/silkscreen-400-ext.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+    unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7,
+                   U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF,
+                   U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB,
+                   U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+    font-family: 'Silkscreen';
+    src: url('../fonts/silkscreen-400.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6,
+                   U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F,
+                   U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215,
+                   U+FEFF, U+FFFD;
+}
+@font-face {
+    font-family: 'Silkscreen';
+    src: url('../fonts/silkscreen-700.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* ASCII art fonts — hosted locally (offline-first) */
+/* IBM Plex Mono: full box-drawing, IBM terminal     (default)    */
+@font-face {
+    font-family: 'IBM Plex Mono';
+    src: url('../fonts/ibm-plex-mono-400-ext.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+    unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7,
+                   U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF,
+                   U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB,
+                   U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+    font-family: 'IBM Plex Mono';
+    src: url('../fonts/ibm-plex-mono-400.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6,
+                   U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F,
+                   U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215,
+                   U+FEFF, U+FFFD;
+}
+@font-face {
+    font-family: 'IBM Plex Mono';
+    src: url('../fonts/ibm-plex-mono-700.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* VT323: CRT bitmap pixel terminal          (vintage 80s) */
+@font-face {
+    font-family: 'VT323';
+    src: url('../fonts/vt323-400.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* Share Tech Mono: sci-fi military terminal         (futuristic)  */
+@font-face {
+    font-family: 'Share Tech Mono';
+    src: url('../fonts/share-tech-mono-400.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* Inconsolata: humanist monospace, warm readable  (comfortable) */
+@font-face {
+    font-family: 'Inconsolata';
+    src: url('../fonts/inconsolata-400-ext.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+    unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7,
+                   U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF,
+                   U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB,
+                   U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+    font-family: 'Inconsolata';
+    src: url('../fonts/inconsolata-400.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6,
+                   U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F,
+                   U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215,
+                   U+FEFF, U+FFFD;
+}
+
+/* ========== ASCII FONT VARIABLE (changed by JS font selector) ========== */
+:root {
+    --ascii-font-family: 'IBM Plex Mono', 'Courier New', monospace;
+}
+
+/* ========== THEME: TERMINAL (Default) ========== */
+:root,
+[data-theme="terminal"] {
+    --bg-deep: #0a0a12;
+    --bg-surface: #12121a;
+    --bg-image: none;
+    --accent-primary: #00ff41;
+    --accent-secondary: #5bcefa;
+    --accent-highlight: #f4d03f;
+    --accent-danger: #ff6b6b;
+    --text-primary: #e0e0e0;
+    --text-secondary: #808080;
+    --border: #2a2a3a;
+    --glow-color: #00ff41;
+}
+
+/* ========== THEME: ONESHOT ========== */
+[data-theme="oneshot"] {
+    --bg-deep: #1a0a1f;
+    --bg-surface: #2d1536;
+    --bg-image: none;
+    --accent-primary: #ffb347;
+    --accent-secondary: #ff7e67;
+    --accent-highlight: #ffd700;
+    --accent-danger: #ff6b6b;
+    --text-primary: #f0e6d3;
+    --text-secondary: #a08070;
+    --border: #4a2a4a;
+    --glow-color: #ffb347;
+}
+
+/* ========== THEME: CELESTE ========== */
+[data-theme="celeste"] {
+    --bg-deep: #fdf6e3;
+    --bg-surface: #eee8d5;
+    --bg-image: none;
+    --accent-primary: #d33682;
+    --accent-secondary: #268bd2;
+    --accent-highlight: #b58900;
+    --accent-danger: #dc322f;
+    --text-primary: #073642;
+    --text-secondary: #586e75;
+    --border: #93a1a1;
+    --glow-color: #d33682;
+}
+
+/* ========== THEME: V1 ORIGINAL ========== */
+[data-theme="v1"] {
+    --bg-deep: #1a1a2e;
+    --bg-surface: rgba(90, 89, 119, 0.6);
+    --bg-image: url('../images/backgrounds/v1-space.jpg');
+    --accent-primary: #8d8dc1;
+    --accent-secondary: #b3cadc;
+    --accent-highlight: #d83f16;
+    --accent-danger: #ff6b6b;
+    --text-primary: #b3cadc;
+    --text-secondary: #5a5977;
+    --border: #5a5977;
+    --glow-color: #8d8dc1;
+}
+
+/* ========== RESET ========== */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* ========== BASE ========== */
+html {
+    font-size: 16px;
+}
+
+/*
+ * body uses --ascii-font-family so the font selector changes cascade
+ * to every element that doesn't have an explicit font-family override.
+ * Exclusions (title, subtitle, result canvas, footer credits) are pinned below.
+ */
+body {
+    font-family: var(--ascii-font-family);
+    background-color: var(--bg-deep);
+    background-image: var(--bg-image);
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    color: var(--text-primary);
+    min-height: 100vh;
+    line-height: 1.5;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ========== ASCII FONT UTILITY (kept for legacy / explicit use) ========== */
+.ascii-font {
+    font-family: var(--ascii-font-family);
+}
+
+/* ========== LAYOUT ========== */
+.container {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 1.5rem 1rem;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.header-title {
+    text-align: center;
+}
+
+.header-controls {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem 1.5rem;
+    align-items: center;
+}
+
+/* ── PINNED: control labels stay small-caps style but follow selector ── */
+.control-label {
+    font-size: 0.55rem;
+    color: var(--text-secondary);
+}
+
+/* ── PINNED: title & subtitle keep their fixed fonts ── */
+.title {
+    font-family: 'Silkscreen', monospace;
+    font-size: 2rem;
+    color: var(--accent-highlight);
+    letter-spacing: 0.2em;
+    text-shadow: 0 0 10px var(--glow-color);
+}
+
+.subtitle {
+    font-family: 'Courier New', monospace;   /* pinned — not switched by selector */
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+}
+
+.main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.section-title {
+    font-size: 0.7rem;
+    color: var(--accent-primary);
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.1em;
+}
+
+/* ========== INFO PANEL (Top) ========== */
+.info-panel {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.info-panel .entropy-source,
+.info-panel .api-info {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    padding: 0.75rem;
+    backdrop-filter: blur(4px);
+}
+
+.info-panel .terminal-output {
+    font-size: 0.65rem;
+    line-height: 1.6;
+}
+
+.info-panel .terminal-output p {
+    margin: 0.15rem 0;
+}
+
+/* ========== THEME + LANG SELECTORS ========== */
+.theme-selector,
+.lang-selector {
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+}
+
+.theme-btn {
+    font-size: 0.625rem;
+    padding: 0.4rem 0.6rem;
+    background: var(--bg-surface);
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.theme-btn:hover {
+    border-color: var(--accent-secondary);
+    color: var(--accent-secondary);
+}
+
+.theme-btn.active {
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
+    box-shadow: 0 0 6px var(--glow-color);
+}
+
+/* ========== DICE SELECTOR ========== */
+.dice-selector {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    padding: 1rem;
+    backdrop-filter: blur(4px);
+}
+
+.dice-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.5rem;
+}
+
+.dice-btn {
+    font-size: 0.75rem;
+    padding: 0.6rem 0.4rem;
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.dice-btn:hover {
+    border-color: var(--accent-secondary);
+    color: var(--accent-secondary);
+}
+
+.dice-btn.active {
+    border-color: var(--accent-highlight);
+    color: var(--accent-highlight);
+    box-shadow: 0 0 8px var(--glow-color);
+}
+
+.dice-btn-random {
+    background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+    color: var(--bg-deep);
+    font-weight: bold;
+    border: none;
+}
+
+.dice-btn-random:hover {
+    opacity: 0.9;
+    color: var(--bg-deep);
+}
+
+.dice-btn-random.active {
+    box-shadow: 0 0 12px var(--accent-secondary);
+}
+
+/* ========== ENTROPY SELECTOR ========== */
+
+.entropy-selector {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-items: center;
+    margin-top: 0.75rem;
+    padding-top: 0.6rem;
+    border-top: 1px solid var(--border);
+}
+
+.entropy-label {
+    font-size: 0.6rem;
+    color: var(--text-secondary);
+    margin-right: 0.25rem;
+}
+
+.entropy-btn {
+    font-size: 0.55rem;
+    padding: 0.3rem 0.6rem;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+}
+
+.entropy-btn:hover {
+    border-color: var(--accent-secondary);
+    color: var(--accent-secondary);
+}
+
+.entropy-btn.active {
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
+    box-shadow: 0 0 6px var(--glow-color);
+}
+
+/* ========== ROLL ZONE ========== */
+.roll-zone {
+    text-align: center;
+}
+
+.result-display {
+    background: transparent;
+    border: none;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.dice-sprite {
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dice-sprite img {
+    max-width: 100%;
+    max-height: 100%;
+    image-rendering: pixelated;
+    filter: drop-shadow(0 0 8px var(--glow-color));
+}
+
+.dice-sprite.rolling img {
+    filter: drop-shadow(0 0 8px var(--accent-secondary));
+    animation: shake 0.1s infinite;
+}
+
+@keyframes shake {
+    0%, 100% { transform: rotate(-3deg); }
+    50% { transform: rotate(3deg); }
+}
+
+/* ── PINNED: dice type label keeps Silkscreen ── */
+.dice-type-label {
+    font-family: 'Silkscreen', monospace;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+}
+
+.roll-btn {
+    font-size: 1rem;
+    padding: 1rem 3rem;
+    background: transparent;
+    color: var(--accent-primary);
+    border: 2px solid var(--accent-primary);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    letter-spacing: 0.1em;
+}
+
+.roll-btn:hover {
+    background: var(--accent-primary);
+    color: var(--bg-deep);
+    box-shadow: 0 0 15px var(--glow-color);
+}
+
+.roll-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ========== TERMINAL OUTPUT ========== */
+.terminal-output {
+    font-size: 0.75rem;
+    color: var(--accent-primary);
+    line-height: 1.8;
+}
+
+.terminal-output p {
+    margin: 0.25rem 0;
+}
+
+.terminal-output .hazardous-yes {
+    color: var(--accent-danger);
+}
+
+.terminal-output .hazardous-no {
+    color: var(--accent-primary);
+}
+
+.terminal-output .seed-line {
+    color: var(--accent-highlight);
+    font-size: 0.65rem;
+    margin-top: 0.4rem;
+    border-top: 1px solid var(--border);
+    padding-top: 0.3rem;
+}
+
+/* ========== FOOTER ========== */
+.footer {
+    text-align: center;
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+}
+
+/* ── PINNED: footer credits keep fixed font ── */
+.footer p {
+    font-family: 'Courier New', monospace;
+    font-size: 0.625rem;
+    color: var(--text-secondary);
+    letter-spacing: 0.1em;
+}
+
+/* ========== LANG BUTTON (mirrors theme-btn) ========== */
+.lang-btn {
+    font-size: 0.625rem;
+    padding: 0.4rem 0.6rem;
+    background: var(--bg-surface);
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.lang-btn:hover {
+    border-color: var(--accent-secondary);
+    color: var(--accent-secondary);
+}
+
+.lang-btn.active {
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
+    box-shadow: 0 0 6px var(--glow-color);
+}
+
+/* ========== DICE COUNT SELECTOR (#7) ========== */
+.dice-count-selector {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+    padding-top: 0.6rem;
+    border-top: 1px solid var(--border);
+}
+
+.count-btn {
+    font-size: 0.8rem;
+    width: 1.8rem;
+    height: 1.8rem;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.count-btn:hover:not(:disabled) {
+    border-color: var(--accent-secondary);
+    color: var(--accent-secondary);
+}
+
+.count-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.count-display {
+    font-size: 1rem;
+    color: var(--accent-highlight);
+    min-width: 1.5rem;
+    text-align: center;
+}
+
+/* ========== MULTI-ROLL RESULTS (#7) ========== */
+.multi-roll-results {
+    margin: 0.5rem auto;
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--text-primary);
+    line-height: 1.6;
+    min-height: 2rem;
+}
+
+/* Grid of dice sprites when rolling multiple dice */
+.multi-dice-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.6rem 0.8rem;
+    margin: 0.5rem 0 0.25rem;
+}
+
+.multi-dice-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.multi-dice-img {
+    width: 40px;
+    height: 40px;
+    image-rendering: pixelated;
+    filter: drop-shadow(0 0 5px var(--glow-color));
+}
+
+/* Placeholder when no sprite exists for this die type */
+.multi-dice-no-img {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border);
+    font-size: 0.65rem;
+    color: var(--text-secondary);
+}
+
+.multi-dice-result {
+    font-size: 0.85rem;
+    color: var(--accent-highlight);
+    font-weight: bold;
+    text-shadow: 0 0 6px var(--glow-color);
+    line-height: 1;
+}
+
+.multi-rolls {
+    color: var(--text-secondary);
+    word-break: break-all;
+}
+
+.multi-sum {
+    color: var(--accent-secondary);
+    margin-top: 0.25rem;
+}
+
+/* ========== HISTORY (#6) ========== */
+.history-panel {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    padding: 0.75rem 1rem;
+    margin-top: 1rem;
+    backdrop-filter: blur(4px);
+}
+
+.history-list {
+    max-height: 14rem;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+}
+
+.history-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+.history-list::-webkit-scrollbar-thumb {
+    background: var(--border);
+}
+
+.hist-dice {
+    color: var(--accent-highlight);
+    font-size: 0.6rem;
+}
+
+.hist-neo {
+    color: var(--text-secondary);
+    font-size: 0.65rem;
+}
+
+/* ========== STATISTICAL ANALYSIS (#9) ========== */
+.analysis-panel {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    padding: 0.75rem 1rem;
+    margin-top: 1rem;
+    backdrop-filter: blur(4px);
+}
+
+.analyse-btn {
+    font-size: 0.7rem;
+    padding: 0.5rem 1.5rem;
+    margin-top: 0.5rem;
+    background: transparent;
+    color: var(--accent-secondary);
+    border: 1px solid var(--accent-secondary);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.analyse-btn:hover {
+    background: var(--accent-secondary);
+    color: var(--bg-deep);
+    box-shadow: 0 0 10px var(--accent-secondary);
+}
+
+.analysis-results {
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--border);
+}
+
+.analysis-note {
+    color: var(--text-secondary) !important;
+    font-size: 0.62rem !important;
+}
+
+/* ========== PIXEL ART CANVAS RESULT ========== */
+/* canvas is pixel-rendered — no CSS font applies */
+.result-canvas {
+    display: block;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    margin: 0 auto;
+    filter: drop-shadow(0 0 12px var(--glow-color));
+}
+
+.dice-sprite.rolling ~ .result-canvas,
+.result-canvas.rolling {
+    filter: drop-shadow(0 0 16px var(--accent-secondary));
+}
+
+/* ========== PRNG SELECTOR ========== */
+.prng-selector {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-items: center;
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px dashed var(--border);
+}
+
+.prng-btn {
+    font-size: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+}
+
+.prng-btn:hover {
+    border-color: var(--accent-secondary);
+    color: var(--accent-secondary);
+}
+
+.prng-btn.active {
+    border-color: var(--accent-secondary);
+    color: var(--accent-secondary);
+    box-shadow: 0 0 5px var(--accent-secondary);
+}
+
+/* ========== PRNG INFO BLOCK ========== */
+.prng-info {
+    margin-top: 0.5rem;
+    font-size: 0.6rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    min-height: 3rem;
+}
+
+.prng-info p {
+    margin: 0.1rem 0;
+}
+
+.wiki-link {
+    color: var(--accent-secondary);
+    text-decoration: none;
+    font-size: 0.6rem;
+}
+
+.wiki-link:hover {
+    color: var(--accent-primary);
+    text-decoration: underline;
+}
+
+/* ========== ORBIT 2D (#8) ========== */
+.orbit-display {
+    margin-top: 0.6rem;
+    padding-top: 0.5rem;
+    border-top: 1px dashed var(--border);
+    color: var(--accent-secondary);
+    line-height: 1.5;
+}
+
+.orbit-display p {
+    font-size: 0.6rem;
+    margin: 0.1rem 0;
+}
+
+.orbit-title {
+    color: var(--accent-primary) !important;
+    font-size: 0.58rem !important;
+    margin-bottom: 0.3rem !important;
+    letter-spacing: 0.05em;
+}
+
+/* orbit-status line is hidden */
+.orbit-status { display: none; }
+
+/* Log-scale ruler below the orbit ellipse */
+.orbit-scale {
+    font-size: 0.62rem;
+    line-height: 1.45;
+    overflow-x: auto;
+    white-space: pre;
+    color: var(--text-secondary);
+    margin: 0.3rem 0 0;
+    opacity: 0.85;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+}
+
+.orbit-bar {
+    font-size: 0.72rem;
+    line-height: 1.4;
+    overflow-x: auto;
+    white-space: pre;
+    color: var(--accent-secondary);
+    margin: 0.2rem 0 0.1rem;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+}
+
+/* ========== FONT SELECTOR ========== */
+.font-selector {
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+}
+
+.font-btn {
+    font-size: 0.55rem;
+    padding: 0.35rem 0.55rem;
+    background: var(--bg-surface);
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.font-btn:hover {
+    border-color: var(--accent-secondary);
+    color: var(--accent-secondary);
+}
+
+.font-btn.active {
+    border-color: var(--accent-highlight);
+    color: var(--accent-highlight);
+    box-shadow: 0 0 5px var(--glow-color);
+}
+
+/* ========== DATA STATUS (footer) ========== */
+.data-status {
+    margin-top: 0.4rem;
+    font-size: 0.6rem;
+}
+
+.status-ok   { color: var(--accent-primary); }
+.status-warn { color: var(--accent-danger);  }
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 580px) {
+    .info-panel {
+        grid-template-columns: 1fr;
+    }
+
+    .dice-grid {
+        grid-template-columns: repeat(5, 1fr);
+    }
+
+    .title {
+        font-size: 1.5rem;
+    }
+
+    .theme-selector,
+    .lang-selector {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .theme-btn,
+    .lang-btn {
+        font-size: 0.5rem;
+        padding: 0.4rem 0.5rem;
+    }
+
+    .header-controls {
+        gap: 0.5rem 1rem;
+    }
+}

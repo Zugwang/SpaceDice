@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpaceDice Reloaded</title>
+    <!-- Silkscreen: pixel UI labels -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- Preload all selectable fonts so switching is instant with no FOUT -->
+    <link rel="preload" href="{{ url_for('static', filename='fonts/ibm-plex-mono-400.woff2') }}"    as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="{{ url_for('static', filename='fonts/ibm-plex-mono-700.woff2') }}"    as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="{{ url_for('static', filename='fonts/vt323-400.woff2') }}"            as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="{{ url_for('static', filename='fonts/share-tech-mono-400.woff2') }}"  as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="{{ url_for('static', filename='fonts/inconsolata-400.woff2') }}"      as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="{{ url_for('static', filename='fonts/silkscreen-400.woff2') }}"       as="font" type="font/woff2" crossorigin>
+</head>
+<body>
+    <div class="container">
+
+        <!-- ===== HEADER ===== -->
+        <header class="header">
+            <div class="header-title">
+                <h1 class="title" data-i18n="title">SPACE DICE</h1>
+                <p class="subtitle" data-i18n="subtitle">Dés à Entropie d'Astéroïdes</p>
+            </div>
+            <div class="header-controls">
+                <div class="theme-selector">
+                    <span class="control-label" data-i18n="theme_label">THÈME:</span>
+                    <button class="theme-btn active" data-theme="terminal">TERMINAL</button>
+                    <button class="theme-btn" data-theme="oneshot">ONESHOT</button>
+                    <button class="theme-btn" data-theme="celeste">CELESTE</button>
+                    <button class="theme-btn" data-theme="v1">V1</button>
+                </div>
+                <div class="lang-selector">
+                    <span class="control-label" data-i18n="lang_label">LANG:</span>
+                    <button class="lang-btn active" data-lang="fr">FR</button>
+                    <button class="lang-btn" data-lang="en">EN</button>
+                </div>
+                <div class="font-selector">
+                    <span class="control-label" data-i18n="font_label">POLICE:</span>
+                    <button class="font-btn active" data-font="ibm"    title="IBM Plex Mono — terminal IBM">IBM</button>
+                    <button class="font-btn"         data-font="vt323"  title="VT323 — CRT rétro 80s">CRT</button>
+                    <button class="font-btn"         data-font="share"  title="Share Tech Mono — sci-fi">SCI-FI</button>
+                    <button class="font-btn"         data-font="inconsolata" title="Inconsolata — humaniste">MONO</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- ===== INFO PANEL ===== -->
+        <section class="info-panel">
+            <div class="entropy-source">
+                <h2 class="section-title" data-i18n="entropy_source">> SOURCE D'ENTROPIE</h2>
+
+                <!-- NEO data display -->
+                <div id="neo-data" class="terminal-output ascii-font">
+                    <p data-i18n="awaiting">> EN ATTENTE DE LANCER...</p>
+                </div>
+
+                <!-- 2D orbit display -->
+                <div id="orbit-display" class="orbit-display ascii-font"></div>
+
+                <!-- Seed source selector (which NASA field feeds the seed) -->
+                <div class="entropy-selector">
+                    <span class="entropy-label" data-i18n="seed_label">SEED:</span>
+                    <button class="entropy-btn" data-source="diameter">DIAM</button>
+                    <button class="entropy-btn" data-source="velocity">VEL</button>
+                    <button class="entropy-btn" data-source="distance">DIST</button>
+                    <button class="entropy-btn active" data-source="combined">COMB</button>
+                </div>
+
+                <!-- PRNG algorithm selector -->
+                <div class="prng-selector">
+                    <span class="entropy-label" data-i18n="prng_label">ALGO:</span>
+                    <button class="prng-btn active" data-algo="xor">XOR</button>
+                    <button class="prng-btn" data-algo="lcg">LCG</button>
+                    <button class="prng-btn" data-algo="xorshift">XORSHIFT</button>
+                    <button class="prng-btn" data-algo="murmur">MURMUR3</button>
+                </div>
+
+                <!-- Active PRNG description + Wikipedia link -->
+                <div id="prng-info" class="prng-info ascii-font"></div>
+            </div>
+
+            <div class="api-info">
+                <h2 class="section-title" data-i18n="nasa_api">> NASA NEO API</h2>
+                <div class="terminal-output ascii-font" id="api-info-text">
+                    <!-- filled by JS based on language -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== MAIN: DICE SELECTOR + ROLL ===== -->
+        <main class="main">
+            <section class="dice-selector">
+                <h2 class="section-title" data-i18n="select_dice">> SÉLECTIONNER LE DÉ</h2>
+                <div class="dice-grid">
+                    <button class="dice-btn" data-dice="2">d2</button>
+                    <button class="dice-btn" data-dice="3">d3</button>
+                    <button class="dice-btn" data-dice="4">d4</button>
+                    <button class="dice-btn active" data-dice="6">d6</button>
+                    <button class="dice-btn" data-dice="8">d8</button>
+                    <button class="dice-btn" data-dice="10">d10</button>
+                    <button class="dice-btn" data-dice="12">d12</button>
+                    <button class="dice-btn" data-dice="20">d20</button>
+                    <button class="dice-btn" data-dice="100">d100</button>
+                    <button class="dice-btn dice-btn-random" data-dice="random">d?</button>
+                </div>
+                <div class="dice-count-selector">
+                    <span class="control-label" data-i18n="dice_count">NOMBRE:</span>
+                    <button class="count-btn" id="count-minus" disabled>−</button>
+                    <span id="count-display" class="count-display">1</span>
+                    <button class="count-btn" id="count-plus">+</button>
+                </div>
+            </section>
+
+            <section class="roll-zone">
+                <div class="result-display">
+                    <div class="dice-sprite" id="dice-sprite">
+                        <img src="{{ url_for('static', filename='sprites/dice/d6.png') }}" alt="dice" id="dice-img">
+                    </div>
+                    <!-- Canvas renders result in pixel art (no text chars) -->
+                    <canvas id="result-canvas" class="result-canvas" aria-label="résultat"></canvas>
+                    <span id="dice-type-label" class="dice-type-label">d6</span>
+                </div>
+                <div id="multi-roll-results" class="multi-roll-results ascii-font"></div>
+                <button id="roll-btn" class="roll-btn" data-i18n="roll">[ LANCER ]</button>
+            </section>
+        </main>
+
+        <!-- ===== HISTORY ===== -->
+        <section class="history-panel">
+            <h2 class="section-title" data-i18n="history_title">> HISTORIQUE DES LANCERS</h2>
+            <div id="history-list" class="terminal-output history-list ascii-font">
+                <p data-i18n="history_empty">> AUCUN LANCER ENCORE</p>
+            </div>
+        </section>
+
+        <!-- ===== STATISTICAL ANALYSIS ===== -->
+        <section class="analysis-panel">
+            <h2 class="section-title" data-i18n="analyse_title">> ANALYSE STATISTIQUE</h2>
+            <div id="analysis-status" class="terminal-output ascii-font"></div>
+            <button id="analyse-btn" class="analyse-btn" data-i18n="analyse_btn" style="display:none">[ ANALYSER ]</button>
+            <div id="analysis-results" class="terminal-output analysis-results ascii-font" style="display:none"></div>
+        </section>
+
+        <footer class="footer">
+            <p data-i18n="powered">Propulsé par NASA NEO API | Offline-First</p>
+            <div id="data-status" class="data-status ascii-font"></div>
+        </footer>
+    </div>
+
+    <script>
+        const NEO_DATA  = {{ neo_data  | tojson }};
+        const DATA_META = {{ data_meta | tojson }};
+    </script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

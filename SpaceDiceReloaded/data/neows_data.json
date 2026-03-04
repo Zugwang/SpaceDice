@@ -1,0 +1,92 @@
+[
+  {
+    "name": "(2024 AA1)",
+    "id": "3842761",
+    "hazardous": false,
+    "diameter_min": 127.32,
+    "diameter_max": 284.63,
+    "velocity_kms": 14.73,
+    "velocity_kmh": 53028.0,
+    "distance_km": 3812400.0,
+    "distance_lunar": 9.92,
+    "approach_date": "2024-01-15",
+    "seeds": {
+      "diameter": 4729184736281947,
+      "velocity": 2918473629184736,
+      "distance": 7361829473618294,
+      "combined": 1847362918473629
+    }
+  },
+  {
+    "name": "(2024 BB2)",
+    "id": "3851294",
+    "hazardous": false,
+    "diameter_min": 45.67,
+    "diameter_max": 102.15,
+    "velocity_kms": 8.21,
+    "velocity_kmh": 29556.0,
+    "distance_km": 7293000.0,
+    "distance_lunar": 18.97,
+    "approach_date": "2024-01-15",
+    "seeds": {
+      "diameter": 8273649182736491,
+      "velocity": 5519283746512938,
+      "distance": 3827461938274619,
+      "combined": 6182736491827364
+    }
+  },
+  {
+    "name": "(2024 CC3)",
+    "id": "3803847",
+    "hazardous": true,
+    "diameter_min": 312.45,
+    "diameter_max": 698.72,
+    "velocity_kms": 27.84,
+    "velocity_kmh": 100224.0,
+    "distance_km": 1204800.0,
+    "distance_lunar": 3.13,
+    "approach_date": "2024-01-15",
+    "seeds": {
+      "diameter": 1928374651928374,
+      "velocity": 9182736491827364,
+      "distance": 4716283947162839,
+      "combined": 8372916483729164
+    }
+  },
+  {
+    "name": "(2024 DD4)",
+    "id": "3771829",
+    "hazardous": false,
+    "diameter_min": 18.93,
+    "diameter_max": 42.34,
+    "velocity_kms": 5.47,
+    "velocity_kmh": 19692.0,
+    "distance_km": 9481200.0,
+    "distance_lunar": 24.67,
+    "approach_date": "2024-01-15",
+    "seeds": {
+      "diameter": 5738291647382916,
+      "velocity": 2837461928374619,
+      "distance": 9182736419827364,
+      "combined": 3618273946182739
+    }
+  },
+  {
+    "name": "(2024 EE5)",
+    "id": "3889241",
+    "hazardous": false,
+    "diameter_min": 89.12,
+    "diameter_max": 199.34,
+    "velocity_kms": 19.56,
+    "velocity_kmh": 70416.0,
+    "distance_km": 5832000.0,
+    "distance_lunar": 15.17,
+    "approach_date": "2024-01-15",
+    "seeds": {
+      "diameter": 3847261538472615,
+      "velocity": 7261839472618394,
+      "distance": 5183927461839274,
+      "combined": 9374618293746182
+    }
+  }
+]

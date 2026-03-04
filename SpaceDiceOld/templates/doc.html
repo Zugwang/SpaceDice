@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}SpaceDice Documentation{% endblock %}
+
+{% block content %}
+<div class="section" style="padding-top: 5;">
+    <div class="container">
+        <div class="content has-text-centered doc-content">
+            {{ doc_content | safe }}
+        </div>
+    </div>
+</div>
+<div class="section">
+    <div class="container has-text-centered">
+        <div class="columns is-centered is-vcentered">
+            <div class="column">
+                <img class="doc-images" src="{{ url_for('static', filename='images/nasa-pixel.png') }}" alt="Image 1">
+            </div>
+            <div class="column">
+                <img src="{{ url_for('static', filename='images/image2.jpg') }}" alt="Image 2">
+            </div>
+            <div class="column">
+                <img src="{{ url_for('static', filename='images/image3.jpg') }}" alt="Image 3">
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

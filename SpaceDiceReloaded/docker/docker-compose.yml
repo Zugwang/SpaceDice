@@ -1,0 +1,33 @@
+services:
+  spacedice:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: spacedice
+    restart: unless-stopped
+    volumes:
+      - ../data:/app/data
+    env_file:
+      - ../.env
+    expose:
+      - "8000"
+    networks:
+      - spacedice-net
+
+  nginx:
+    image: nginx:alpine
+    container_name: spacedice-nginx
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ../static:/app/static:ro
+    depends_on:
+      - spacedice
+    networks:
+      - spacedice-net
+
+networks:
+  spacedice-net:
+    driver: bridge
