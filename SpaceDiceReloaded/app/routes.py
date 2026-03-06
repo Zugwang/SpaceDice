@@ -1,57 +1,53 @@
-import json
 import os
 from datetime import datetime, timezone, timedelta
-from pathlib import Path
 from flask import Blueprint, render_template
+from .db import get_neos, get_stats, DB_FILE
 
 bp = Blueprint('main', __name__)
 
-DATA_FILE = Path(__file__).parent.parent / 'data' / 'neows_data.json'
+NEO_WINDOW_DAYS = 90  # entropy pool: last 90 days of NEOs
 
 
-def load_neo_data():
-    """Load NASA NEO data. Returns (neos, meta) tuple."""
+def _load_data():
     api_key = os.getenv('NASA_API_KEY', 'DEMO_KEY')
-    meta = {
-        'is_demo_key': (api_key == 'DEMO_KEY' or not api_key),
-        'fetched_at': None,
-        'is_fresh': False,
-        'neo_count': 0,
-    }
+    is_demo = (not api_key or api_key == 'DEMO_KEY')
 
-    if not DATA_FILE.exists():
-        return [], meta
+    if not DB_FILE.exists():
+        return [], {
+            'is_demo_key': is_demo,
+            'neo_count': 0,
+            'is_fresh': False,
+            'oldest_date': None,
+            'newest_date': None,
+            'last_fetch': None,
+            'db_active': False,
+        }
 
-    with open(DATA_FILE) as f:
-        raw = json.load(f)
+    neos = get_neos(days=NEO_WINDOW_DAYS)
+    stats = get_stats()
 
-    # New format: dict with _meta + neos
-    if isinstance(raw, dict) and 'neos' in raw:
-        neos = raw['neos']
-        file_meta = raw.get('_meta', {})
-        meta['fetched_at'] = file_meta.get('fetched_at')
-        meta['is_demo_key'] = file_meta.get('api_key_demo', meta['is_demo_key'])
-    else:
-        # Legacy format: plain list
-        neos = raw
-
-    meta['neo_count'] = len(neos)
-
-    if meta['fetched_at']:
+    is_fresh = False
+    if stats['last_fetch']:
         try:
-            dt = datetime.fromisoformat(meta['fetched_at'])
+            dt = datetime.fromisoformat(stats['last_fetch'])
             if dt.tzinfo is None:
                 dt = dt.replace(tzinfo=timezone.utc)
-            age = datetime.now(timezone.utc) - dt
-            meta['is_fresh'] = age < timedelta(days=2)
+            is_fresh = (datetime.now(timezone.utc) - dt) < timedelta(days=2)
         except (ValueError, TypeError):
             pass
 
-    return neos, meta
+    return neos, {
+        'is_demo_key': is_demo,
+        'neo_count': len(neos),
+        'is_fresh': is_fresh,
+        'oldest_date': stats['oldest'],
+        'newest_date': stats['newest'],
+        'last_fetch': stats['last_fetch'],
+        'db_active': True,
+    }
 
 
 @bp.route('/')
 def index():
-    """Serve SPA with embedded NEO data and status metadata."""
-    neo_data, data_meta = load_neo_data()
+    neo_data, data_meta = _load_data()
     return render_template('index.html', neo_data=neo_data, data_meta=data_meta)
