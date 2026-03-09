@@ -7,34 +7,6 @@ Chaque item inclut un hint d'implémentation pour les agents IA.
 
 ## FEATURES EN ATTENTE
 
-### #5 · Animation de chargement — Slot Machine
-**Priorité :** Moyenne
-**Fichiers concernés :** `static/js/app.js` (`animateRoll`), `static/css/style.css`
-
-**Description :**
-Remplacer l'animation shake + canvas flicker actuelle par une vraie animation de machine à sous : les chiffres défilent rapidement puis ralentissent et s'arrêtent sur le résultat final.
-
-**État actuel :**
-- `animateRoll(finalValue, diceType, cb)` dans `app.js` (ligne ~550)
-- 12 steps de 50ms avec `Math.random()` pour les valeurs intermédiaires
-- Canvas `drawPixelResult()` appelé à chaque step
-
-**Implémentation suggérée :**
-```javascript
-// Phase 1 (0–400ms) : défilement rapide, interval 30ms
-// Phase 2 (400–800ms) : ralentissement, interval exponentiel (30→200ms)
-// Phase 3 : affichage final avec glow flash CSS
-// Utiliser requestAnimationFrame() au lieu de setInterval pour fluidité
-// CSS : ajouter @keyframes pour le glow au moment du résultat final
-```
-
-**Avertissements :**
-- Ne pas casser la callback `cb()` qui déclenche `displayNeoData` et `displayMultiRollResults`
-- Gérer correctement le multi-dés (chaque dé a son propre timing)
-- Désactiver le roll button pendant toute la durée
-
----
-
 ### #10 · Endpoint admin `/refresh`
 **Priorité :** Basse
 **Fichiers concernés :** `app/routes.py`, `app/nasa.py`, `.env.example`

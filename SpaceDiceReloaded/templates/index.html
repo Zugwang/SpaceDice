@@ -13,6 +13,9 @@
     <link rel="preload" href="{{ url_for('static', filename='fonts/share-tech-mono-400.woff2') }}"  as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="{{ url_for('static', filename='fonts/inconsolata-400.woff2') }}"      as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="{{ url_for('static', filename='fonts/silkscreen-400.woff2') }}"       as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="{{ url_for('static', filename='fonts/array-400.woff2') }}"           as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="{{ url_for('static', filename='fonts/jetbrains-mono-400.woff2') }}"  as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="{{ url_for('static', filename='fonts/rx100-400.woff2') }}"           as="font" type="font/woff2" crossorigin>
 </head>
 <body>
     <div class="container">
@@ -42,6 +45,9 @@
                     <button class="font-btn"         data-font="vt323"  title="VT323 — CRT rétro 80s">CRT</button>
                     <button class="font-btn"         data-font="share"  title="Share Tech Mono — sci-fi">SCI-FI</button>
                     <button class="font-btn"         data-font="inconsolata" title="Inconsolata — humaniste">MONO</button>
+                    <button class="font-btn"         data-font="array"       title="Array — géométrique design">ARRAY</button>
+                    <button class="font-btn"         data-font="jetbrains"   title="JetBrains Mono — dev">JB</button>
+                    <button class="font-btn"         data-font="rx100"       title="RX100 — techno condensé">RX100</button>
                 </div>
             </div>
         </header>
@@ -66,6 +72,16 @@
                     <button class="entropy-btn" data-source="velocity">VEL</button>
                     <button class="entropy-btn" data-source="distance">DIST</button>
                     <button class="entropy-btn active" data-source="combined">COMB</button>
+                </div>
+
+                <!-- NEO date range selector (which time window feeds the pool) -->
+                <div class="range-selector">
+                    <span class="entropy-label">POOL:</span>
+                    <button class="range-btn" data-range="today">TODAY</button>
+                    <button class="range-btn" data-range="week">WEEK</button>
+                    <button class="range-btn active" data-range="month">MONTH</button>
+                    <button class="range-btn" data-range="thisyear">YEAR</button>
+                    <button class="range-btn" data-range="all">ALL</button>
                 </div>
 
                 <!-- PRNG algorithm selector -->
@@ -144,13 +160,13 @@
         </section>
 
         <footer class="footer">
-            <p data-i18n="powered">Propulsé par NASA NEO API | Offline-First</p>
+            <p>Propulsé par NASA NEO API | <a href="https://github.com/Zugwang/SpaceDice" target="_blank" rel="noopener">GitHub</a></p>
             <div id="data-status" class="data-status ascii-font"></div>
         </footer>
     </div>
 
     <script>
-        const NEO_DATA  = {{ neo_data  | tojson }};
+        let NEO_DATA    = {{ neo_data  | tojson }};
         const DATA_META = {{ data_meta | tojson }};
     </script>
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>

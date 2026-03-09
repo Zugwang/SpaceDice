@@ -10,8 +10,8 @@ __pycache__/
 .vscode/
 *.swp
 
-# Data (optional - may want to commit initial data)
-# data/neows_data.json
+# Sprite preview temp folder
+static/sprites/dice_preview/
 
 # Build
 *.egg-info/

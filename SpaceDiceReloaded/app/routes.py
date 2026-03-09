@@ -1,11 +1,11 @@
 import os
 from datetime import datetime, timezone, timedelta
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, jsonify, request
 from .db import get_neos, get_stats, DB_FILE
 
 bp = Blueprint('main', __name__)
 
-NEO_WINDOW_DAYS = 90  # entropy pool: last 90 days of NEOs
+NEO_WINDOW_DAYS = 30  # entropy pool default: last 30 days of NEOs
 
 
 def _load_data():
@@ -51,3 +51,23 @@ def _load_data():
 def index():
     neo_data, data_meta = _load_data()
     return render_template('index.html', neo_data=neo_data, data_meta=data_meta)
+
+
+@bp.route('/api/neos')
+def api_neos():
+    range_param = request.args.get('range', '42days')
+    today = datetime.now(timezone.utc).date()
+
+    if range_param == 'today':
+        neos = get_neos(days=1)
+    elif range_param == 'week':
+        neos = get_neos(days=7)
+    elif range_param == 'thisyear':
+        days_since_jan1 = (today - today.replace(month=1, day=1)).days + 1
+        neos = get_neos(days=days_since_jan1)
+    elif range_param == 'all':
+        neos = get_neos(days=None, limit=2000)
+    else:  # month
+        neos = get_neos(days=30)
+
+    return jsonify(neos)

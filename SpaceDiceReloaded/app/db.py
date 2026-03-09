@@ -78,21 +78,28 @@ def upsert_neos(neos: list) -> int:
     return affected
 
 
-def get_neos(days: int = 90) -> list:
-    """Return NEOs from the last N days in the format expected by the frontend."""
+def get_neos(days: int = 90, limit: int = 0) -> list:
+    """Return NEOs in the format expected by the frontend.
+    days=None returns all records (use limit to cap). days=int filters last N days."""
+    _COLS = """
+        SELECT
+            nasa_id       AS id,
+            name, approach_date, hazardous,
+            diameter_min, diameter_max,
+            velocity_kms, velocity_kmh,
+            distance_km, distance_lunar,
+            seed_diameter, seed_velocity, seed_distance, seed_combined
+        FROM neos"""
     with _connect() as conn:
-        rows = conn.execute("""
-            SELECT
-                nasa_id       AS id,
-                name, approach_date, hazardous,
-                diameter_min, diameter_max,
-                velocity_kms, velocity_kmh,
-                distance_km, distance_lunar,
-                seed_diameter, seed_velocity, seed_distance, seed_combined
-            FROM neos
-            WHERE approach_date >= date('now', ?)
-            ORDER BY approach_date DESC
-        """, (f'-{days} days',)).fetchall()
+        if days is None:
+            sql = _COLS + " ORDER BY RANDOM()"
+            params: tuple = ()
+        else:
+            sql = _COLS + " WHERE approach_date >= date('now', ?) ORDER BY approach_date DESC"
+            params = (f'-{days} days',)
+        if limit > 0:
+            sql += f' LIMIT {limit}'
+        rows = conn.execute(sql, params).fetchall()
 
     result = []
     for row in rows:

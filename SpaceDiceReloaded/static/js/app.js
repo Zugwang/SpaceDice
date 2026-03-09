@@ -21,6 +21,7 @@
     const SK_LANG    = 'spacedice-lang';
     const SK_PRNG    = 'spacedice-prng';
     const SK_FONT    = 'spacedice-font';
+    const SK_RANGE   = 'spacedice-range';
 
     // ─────────────────────────────────────────
     //  ASCII FONT OPTIONS
@@ -30,6 +31,9 @@
         vt323:       "'VT323', 'Courier New', monospace",
         share:       "'Share Tech Mono', 'Courier New', monospace",
         inconsolata: "'Inconsolata', 'Courier New', monospace",
+        array:       "'Array', 'Courier New', monospace",
+        jetbrains:   "'JetBrains Mono', 'Courier New', monospace",
+        rx100:       "'RX100', 'Courier New', monospace",
     };
 
     // ─────────────────────────────────────────
@@ -150,7 +154,7 @@
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         const color = getComputedStyle(document.body)
-            .getPropertyValue('--accent-highlight').trim() || '#f4d03f';
+            .getPropertyValue('--accent-primary').trim() || '#00ff41';
         ctx.fillStyle = color;
 
         let curX = 0;
@@ -191,6 +195,7 @@
             dice_count:      'NOMBRE:',
             seed_label:      'SEED:',
             prng_label:      'ALGO:',
+            range_labels:    { today: "AUJ'HUI", week: 'SEMAINE', month: 'MOIS', thisyear: 'ANNÉE', all: 'TOUT' },
             roll:            '[ LANCER ]',
             neo_label:       'NEO:',
             hazard_label:    'DANGER:',
@@ -221,7 +226,7 @@
             analyse_nok:     '> Distribution: BIAISÉE ✗',
             analyse_note:    '> (seuil: p < 0.05 → rejet H₀)',
             analyse_random:  '> Sélectionnez un dé fixe pour analyser',
-            powered:         'Propulsé par NASA NEO API | Offline-First',
+            powered:         'Propulsé par NASA NEO API | GitHub',
             status_demo:     '> DEMO KEY · données réelles non chargées',
             status_fresh:    '> Données NASA: fraîches ({n} NEOs)',
             status_stale:    '> Données NASA: à mettre à jour',
@@ -263,6 +268,7 @@
             dice_count:      'COUNT:',
             seed_label:      'SEED:',
             prng_label:      'ALGO:',
+            range_labels:    { today: 'TODAY', week: 'WEEK', month: 'MONTH', thisyear: 'YEAR', all: 'ALL' },
             roll:            '[ ROLL ]',
             neo_label:       'NEO:',
             hazard_label:    'HAZARD:',
@@ -293,7 +299,7 @@
             analyse_nok:     '> Distribution: BIASED ✗',
             analyse_note:    '> (threshold: p < 0.05 → reject H₀)',
             analyse_random:  '> Select a fixed die to analyse',
-            powered:         'Powered by NASA NEO API | Offline-First',
+            powered:         'Powered by NASA NEO API | GitHub',
             status_demo:     '> DEMO KEY · real data not loaded',
             status_fresh:    '> NASA data: fresh ({n} NEOs)',
             status_stale:    '> NASA data: needs update',
@@ -331,6 +337,8 @@
     let currentPrngAlgo      = 'xor';
     let currentLang          = 'fr';
     let currentFont          = 'ibm';
+    let currentNeoRange      = '42days';
+    let currentTheme         = 'terminal';
 
     const rollStats   = {};   // { diceType: { face: count, _total: n } }
     const rollHistory = [];   // session history (newest first)
@@ -352,6 +360,7 @@
     const themeBtns          = document.querySelectorAll('.theme-btn');
     const langBtns           = document.querySelectorAll('.lang-btn');
     const entropyBtns        = document.querySelectorAll('.entropy-btn');
+    const rangeBtns          = document.querySelectorAll('.range-btn');
     const prngBtns           = document.querySelectorAll('.prng-btn');
     const fontBtns           = document.querySelectorAll('.font-btn');
     const countMinusBtn      = document.getElementById('count-minus');
@@ -383,6 +392,10 @@
                 .map(l => '<p>' + l.replace('{p}', poolSize) + '</p>').join('');
         }
 
+        // Range button labels
+        const rangeLabels = (TR[currentLang] || TR.fr).range_labels || {};
+        rangeBtns.forEach(b => { if (rangeLabels[b.dataset.range]) b.textContent = rangeLabels[b.dataset.range]; });
+
         // Refresh dynamic areas
         updatePrngInfo();
         updateAnalysisStatus();
@@ -404,11 +417,14 @@
     //  THEME
     // ─────────────────────────────────────────
     function setTheme(name) {
+        currentTheme = name;
         document.body.setAttribute('data-theme', name);
         localStorage.setItem(SK_THEME, name);
         themeBtns.forEach(b => b.classList.toggle('active', b.dataset.theme === name));
         // Redraw canvas with new theme color
         if (resultCanvas && resultCanvas._lastText) drawPixelResult(resultCanvas._lastText);
+        // Update sprite to current theme variant
+        updateSprite(currentDice);
     }
 
     function loadTheme() { setTheme(localStorage.getItem(SK_THEME) || 'terminal'); }
@@ -425,6 +441,35 @@
 
     function loadEntropySource() { setEntropySource(localStorage.getItem(SK_ENTROPY) || 'combined'); }
     function handleEntropySelect(e) { if (e.target.classList.contains('entropy-btn')) setEntropySource(e.target.dataset.source); }
+
+    // ─────────────────────────────────────────
+    //  NEO DATE RANGE
+    // ─────────────────────────────────────────
+    function updateNeoDisplay() {
+        const poolSize = Math.min(NEO_POOL_SIZE, NEO_DATA ? NEO_DATA.length : 0);
+        if (!NEO_DATA || NEO_DATA.length === 0) {
+            neoDataEl.innerHTML = '<p>' + t('no_neo') + '</p><p>' + t('crypto_only') + '</p>';
+        } else {
+            neoDataEl.innerHTML =
+                '<p>' + t('neos_loaded', { n: NEO_DATA.length, p: poolSize }) + '</p>' +
+                '<p>' + t('ready') + '</p>';
+        }
+        applyTranslations();
+    }
+
+    function setNeoRange(range) {
+        currentNeoRange = range;
+        localStorage.setItem(SK_RANGE, range);
+        rangeBtns.forEach(b => b.classList.toggle('active', b.dataset.range === range));
+        neoDataEl.innerHTML = '<p>> LOADING...</p>';
+        fetch('/api/neos?range=' + range)
+            .then(r => r.json())
+            .then(data => { NEO_DATA = data; updateNeoDisplay(); })
+            .catch(() => { neoDataEl.innerHTML = '<p>> FETCH ERROR</p>'; });
+    }
+
+    function loadNeoRange() { setNeoRange(localStorage.getItem(SK_RANGE) || 'month'); }
+    function handleRangeSelect(e) { if (e.target.classList.contains('range-btn')) setNeoRange(e.target.dataset.range); }
 
     // ─────────────────────────────────────────
     //  PRNG ALGORITHM
@@ -564,7 +609,7 @@
     // ─────────────────────────────────────────
     function updateSprite(diceType) {
         if (DICE_WITH_SPRITES.includes(diceType)) {
-            diceImg.src = '/static/sprites/dice/d' + diceType + '.png';
+            diceImg.src = '/static/sprites/dice/' + currentTheme + '/d' + diceType + '.png';
             diceImg.alt = 'd' + diceType;
             diceSprite.style.display = 'flex';
         } else {
@@ -755,7 +800,7 @@
         diceTypeLabel.style.display = 'none';
 
         const hasSrc = DICE_WITH_SPRITES.includes(diceType);
-        const imgSrc = hasSrc ? '/static/sprites/dice/d' + diceType + '.png' : null;
+        const imgSrc = hasSrc ? '/static/sprites/dice/' + currentTheme + '/d' + diceType + '.png' : null;
 
         // Build grid of sprites + individual results
         let html = '<div class="multi-dice-grid">';
@@ -1011,6 +1056,7 @@
     function init() {
         loadTheme();
         loadEntropySource();
+        loadNeoRange();
         loadPrngAlgo();
         loadAsciiFont();
         loadLang();   // triggers applyTranslations()
@@ -1020,6 +1066,7 @@
         document.querySelector('.theme-selector').addEventListener('click', handleThemeSelect);
         document.querySelector('.lang-selector').addEventListener('click', handleLangSelect);
         document.querySelector('.entropy-selector').addEventListener('click', handleEntropySelect);
+        document.querySelector('.range-selector').addEventListener('click', handleRangeSelect);
         document.querySelector('.prng-selector').addEventListener('click', handlePrngSelect);
         document.querySelector('.font-selector').addEventListener('click', handleFontSelect);
         countMinusBtn.addEventListener('click', () => setDiceCount(diceCount - 1));
@@ -1038,15 +1085,7 @@
         drawPixelResult('-');
         resultCanvas._lastText = '-';
 
-        // NEO count display
-        const poolSize = Math.min(NEO_POOL_SIZE, NEO_DATA ? NEO_DATA.length : 0);
-        if (!NEO_DATA || NEO_DATA.length === 0) {
-            neoDataEl.innerHTML = '<p>' + t('no_neo') + '</p><p>' + t('crypto_only') + '</p>';
-        } else {
-            neoDataEl.innerHTML =
-                '<p>' + t('neos_loaded', { n: NEO_DATA.length, p: poolSize }) + '</p>' +
-                '<p>' + t('ready') + '</p>';
-        }
+        // NEO count display — handled by loadNeoRange() → updateNeoDisplay()
 
         updateAnalysisStatus();
         renderDataStatus();

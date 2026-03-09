@@ -105,6 +105,47 @@
                    U+FEFF, U+FFFD;
 }
 
+/* Array: geometric monospace, design-forward            (clean) */
+@font-face {
+    font-family: 'Array';
+    src: url('../fonts/array-400.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Array';
+    src: url('../fonts/array-700.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* JetBrains Mono: developer mono, clear disambig         (dev)   */
+@font-face {
+    font-family: 'JetBrains Mono';
+    src: url('../fonts/jetbrains-mono-400.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'JetBrains Mono';
+    src: url('../fonts/jetbrains-mono-700.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* RX100: condensed techno mono                          (techno) */
+@font-face {
+    font-family: 'RX100';
+    src: url('../fonts/rx100-400.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
 /* ========== ASCII FONT VARIABLE (changed by JS font selector) ========== */
 :root {
     --ascii-font-family: 'IBM Plex Mono', 'Courier New', monospace;
@@ -143,7 +184,7 @@
 
 /* ========== THEME: CELESTE ========== */
 [data-theme="celeste"] {
-    --bg-deep: #fdf6e3;
+    --bg-deep: #fefae0;
     --bg-surface: #eee8d5;
     --bg-image: none;
     --accent-primary: #d33682;
@@ -244,11 +285,10 @@ body {
 
 /* ── PINNED: title & subtitle keep their fixed fonts ── */
 .title {
-    font-family: 'Silkscreen', monospace;
+    font-family: 'Array', monospace;
     font-size: 2rem;
     color: var(--accent-highlight);
     letter-spacing: 0.2em;
-    text-shadow: 0 0 10px var(--glow-color);
 }
 
 .subtitle {
@@ -291,10 +331,14 @@ body {
 .info-panel .terminal-output {
     font-size: 0.65rem;
     line-height: 1.6;
+    overflow: hidden;
 }
 
 .info-panel .terminal-output p {
     margin: 0.15rem 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* ========== THEME + LANG SELECTORS ========== */
@@ -411,6 +455,37 @@ body {
 }
 
 .entropy-btn.active {
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
+    box-shadow: 0 0 6px var(--glow-color);
+}
+
+.range-selector {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-items: center;
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px dashed var(--border);
+}
+
+.range-btn {
+    font-size: 0.55rem;
+    padding: 0.3rem 0.6rem;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+}
+
+.range-btn:hover {
+    border-color: var(--accent-secondary);
+    color: var(--accent-secondary);
+}
+
+.range-btn.active {
     border-color: var(--accent-primary);
     color: var(--accent-primary);
     box-shadow: 0 0 6px var(--glow-color);
@@ -620,16 +695,16 @@ body {
 }
 
 .multi-dice-img {
-    width: 40px;
-    height: 40px;
+    width: 64px;
+    height: 64px;
     image-rendering: pixelated;
     filter: drop-shadow(0 0 5px var(--glow-color));
 }
 
 /* Placeholder when no sprite exists for this die type */
 .multi-dice-no-img {
-    width: 40px;
-    height: 40px;
+    width: 64px;
+    height: 64px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -640,7 +715,7 @@ body {
 
 .multi-dice-result {
     font-size: 0.85rem;
-    color: var(--accent-highlight);
+    color: var(--accent-primary);
     font-weight: bold;
     text-shadow: 0 0 6px var(--glow-color);
     line-height: 1;
