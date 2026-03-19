@@ -1,0 +1,10 @@
+[Unit]
+Description=Daily NASA NEO fetch for SpaceDice
+
+[Timer]
+OnCalendar=*-*-* 06:00:00
+RandomizedDelaySec=900
+Persistent=true
+
+[Install]
+WantedBy=timers.target

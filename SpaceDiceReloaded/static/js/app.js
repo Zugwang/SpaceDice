@@ -2,6 +2,7 @@
  * SpaceDice Reloaded — Client-side SPA
  * Features: i18n FR/EN · pixel art canvas result · PRNG selector · multi-NEO entropy
  *           roll history · multi-dice · 2D ASCII orbit · chi-square stats
+ *           PWA · export CSV · custom theme · extended stats
  */
 (function () {
     'use strict';
@@ -22,6 +23,7 @@
     const SK_PRNG    = 'spacedice-prng';
     const SK_FONT    = 'spacedice-font';
     const SK_RANGE   = 'spacedice-range';
+    const SK_CUSTOM  = 'spacedice-custom-theme';
 
     // ─────────────────────────────────────────
     //  ASCII FONT OPTIONS
@@ -226,12 +228,21 @@
             analyse_nok:     '> Distribution: BIAISÉE ✗',
             analyse_note:    '> (seuil: p < 0.05 → rejet H₀)',
             analyse_random:  '> Sélectionnez un dé fixe pour analyser',
+            analyse_streak:  '> Streak max: {n}× face {f}',
+            analyse_stddev:  '> Écart-type: {v}',
+            analyse_heatmap: '> Heatmap:',
             powered:         'Propulsé par NASA NEO API | GitHub',
             status_demo:     '> DEMO KEY · données réelles non chargées',
             status_fresh:    '> Données NASA: fraîches ({n} NEOs)',
             status_stale:    '> Données NASA: à mettre à jour',
             status_nodata:   '> Aucune donnée NASA · exécutez fetch_nasa.py',
             wiki_link:       '> Wikipedia →',
+            custom_title:    '> THÈME PERSONNALISÉ',
+            custom_accent:   'Accent',
+            custom_highlight: 'Highlight',
+            custom_bg:       'Fond',
+            custom_apply:    '[ APPLIQUER ]',
+            custom_reset:    '[ RESET ]',
             api_lines: [
                 '> NEO: Near-Earth Objects — astéroïdes',
                 ">   dont l'orbite croise le voisinage",
@@ -299,12 +310,21 @@
             analyse_nok:     '> Distribution: BIASED ✗',
             analyse_note:    '> (threshold: p < 0.05 → reject H₀)',
             analyse_random:  '> Select a fixed die to analyse',
+            analyse_streak:  '> Max streak: {n}× face {f}',
+            analyse_stddev:  '> Std deviation: {v}',
+            analyse_heatmap: '> Heatmap:',
             powered:         'Powered by NASA NEO API | GitHub',
             status_demo:     '> DEMO KEY · real data not loaded',
             status_fresh:    '> NASA data: fresh ({n} NEOs)',
             status_stale:    '> NASA data: needs update',
             status_nodata:   '> No NASA data · run fetch_nasa.py',
             wiki_link:       '> Wikipedia →',
+            custom_title:    '> CUSTOM THEME',
+            custom_accent:   'Accent',
+            custom_highlight: 'Highlight',
+            custom_bg:       'Background',
+            custom_apply:    '[ APPLY ]',
+            custom_reset:    '[ RESET ]',
             api_lines: [
                 '> NEO: Near-Earth Objects — asteroids',
                 ">   crossing Earth's orbital vicinity",
@@ -342,6 +362,7 @@
 
     const rollStats   = {};   // { diceType: { face: count, _total: n } }
     const rollHistory = [];   // session history (newest first)
+    const streakTracker = {}; // { diceType: { current: n, currentFace: f, max: n, maxFace: f } }
 
     // ─────────────────────────────────────────
     //  DOM
@@ -371,6 +392,13 @@
     const analysisStatusEl   = document.getElementById('analysis-status');
     const analyseBtnEl       = document.getElementById('analyse-btn');
     const analysisResultsEl  = document.getElementById('analysis-results');
+    const exportBtn          = document.getElementById('export-btn');
+    const customizerPanel    = document.getElementById('customizer-panel');
+    const customAccentInput  = document.getElementById('custom-accent');
+    const customHighlightInput = document.getElementById('custom-highlight');
+    const customBgInput      = document.getElementById('custom-bg');
+    const customApplyBtn     = document.getElementById('custom-apply');
+    const customResetBtn     = document.getElementById('custom-reset');
 
     // ─────────────────────────────────────────
     //  i18n
@@ -421,14 +449,61 @@
         document.body.setAttribute('data-theme', name);
         localStorage.setItem(SK_THEME, name);
         themeBtns.forEach(b => b.classList.toggle('active', b.dataset.theme === name));
+        // Show/hide customizer panel
+        if (customizerPanel) customizerPanel.style.display = name === 'custom' ? 'block' : 'none';
         // Redraw canvas with new theme color
         if (resultCanvas && resultCanvas._lastText) drawPixelResult(resultCanvas._lastText);
         // Update sprite to current theme variant
         updateSprite(currentDice);
     }
 
-    function loadTheme() { setTheme(localStorage.getItem(SK_THEME) || 'terminal'); }
+    function loadTheme() {
+        var saved = localStorage.getItem(SK_THEME) || 'terminal';
+        // Restore custom colors if custom theme was saved
+        if (saved === 'custom') {
+            try {
+                var colors = JSON.parse(localStorage.getItem(SK_CUSTOM));
+                if (colors) applyCustomColors(colors);
+            } catch (_) { /* ignore */ }
+        }
+        setTheme(saved);
+    }
+
     function handleThemeSelect(e) { if (e.target.classList.contains('theme-btn')) setTheme(e.target.dataset.theme); }
+
+    // ─────────────────────────────────────────
+    //  CUSTOM THEME (A5)
+    // ─────────────────────────────────────────
+    function applyCustomColors(colors) {
+        var root = document.documentElement;
+        if (colors.accent) root.style.setProperty('--accent-primary', colors.accent);
+        if (colors.highlight) root.style.setProperty('--accent-highlight', colors.highlight);
+        if (colors.bg) {
+            root.style.setProperty('--bg-deep', colors.bg);
+            root.style.setProperty('--glow-color', colors.accent || '#00ff41');
+        }
+    }
+
+    function resetCustomColors() {
+        var root = document.documentElement;
+        root.style.removeProperty('--accent-primary');
+        root.style.removeProperty('--accent-highlight');
+        root.style.removeProperty('--bg-deep');
+        root.style.removeProperty('--glow-color');
+        localStorage.removeItem(SK_CUSTOM);
+        setTheme('terminal');
+    }
+
+    function handleCustomApply() {
+        var colors = {
+            accent: customAccentInput.value,
+            highlight: customHighlightInput.value,
+            bg: customBgInput.value,
+        };
+        localStorage.setItem(SK_CUSTOM, JSON.stringify(colors));
+        applyCustomColors(colors);
+        setTheme('custom');
+    }
 
     // ─────────────────────────────────────────
     //  ENTROPY SOURCE (seed data field)
@@ -607,9 +682,14 @@
     // ─────────────────────────────────────────
     //  SPRITES
     // ─────────────────────────────────────────
+    function spriteTheme() {
+        // custom theme falls back to terminal sprites
+        return (currentTheme === 'custom') ? 'terminal' : currentTheme;
+    }
+
     function updateSprite(diceType) {
         if (DICE_WITH_SPRITES.includes(diceType)) {
-            diceImg.src = '/static/sprites/dice/' + currentTheme + '/d' + diceType + '.png';
+            diceImg.src = '/static/sprites/dice/' + spriteTheme() + '/d' + diceType + '.png';
             diceImg.alt = 'd' + diceType;
             diceSprite.style.display = 'flex';
         } else {
@@ -651,16 +731,6 @@
     // ─────────────────────────────────────────
     //  2D ASCII ORBIT
     // ─────────────────────────────────────────
-    /**
-     * Top-down view of the inner solar system.
-     * Sun at center-left, Earth on orbit right edge, NEO outside at distance proportional to LD.
-     *
-     *        · · · · ·
-     *     ·             ·
-     *   ·   ☀      [E]  ·  · · ·★  12.5 LD
-     *     ·             ·
-     *        · · · · ·
-     */
     function renderOrbit2D(neo) {
         if (!neo || neo.distance_lunar == null) return '';
 
@@ -692,13 +762,6 @@
             '           · · · · · · · · · ·          ',
         ];
 
-        // ── Log-scale distance ruler ──────────────────────────────────────
-        // Shows distances FROM Earth on a log₁₀ scale.
-        // Anchor points:  Moon = 1 LD  ·  Sun ≈ 389 LD
-        // Mapping: pos = round( log10(dist * 10) / log10(3890) * RULER_W )
-        //   dist=1  → log10(10)/log10(3890) * 40 ≈ 11
-        //   dist=10 → log10(100)/log10(3890) * 40 ≈ 22
-        //   dist=389→ log10(3890)/log10(3890) * 40 = 40
         const RULER_W = 40;
         const LOG_MAX = Math.log10(3890);
 
@@ -709,31 +772,25 @@
             );
         }
 
-        const moonPos = rPos(1);                                      // ≈ 11
-        const neoPos  = Math.max(rPos(ld), moonPos + 1);             // never overlap moon
-        const sunPos  = RULER_W;                                      // = 40
+        const moonPos = rPos(1);
+        const neoPos  = Math.max(rPos(ld), moonPos + 1);
+        const sunPos  = RULER_W;
 
-        // Ruler line: ◉ (Earth origin) — then symbols at log-positions
         const ruler = Array(RULER_W + 1).fill('\u2500');  // ─
         ruler[0]                         = '\u25CE';      // ◉ Earth origin
         ruler[moonPos]                   = moonChar;      // ☽
-        ruler[Math.min(neoPos, sunPos - 1)] = neoChar;   // ★ or ⚠
-        ruler[sunPos]                    = sunChar;       // ☀
+        ruler[Math.min(neoPos, sunPos - 1)] = neoChar;
+        ruler[sunPos]                    = sunChar;        // ☀
         const rulerLine = ruler.join('');
 
-        // Label line: distance values placed after each symbol
         const neoLbl      = ld.toFixed(1) + 'LD';
         const lblArr      = Array(RULER_W + 12).fill(' ');
-        // "1LD" after moon
         ['1', 'L', 'D'].forEach(function (c, i) { lblArr[moonPos + 1 + i] = c; });
-        // NEO label (avoid overlapping moon label at moonPos+1…+3)
         const neoLblStart = Math.max(neoPos + 1, moonPos + 5);
         neoLbl.split('').forEach(function (c, i) { lblArr[neoLblStart + i] = c; });
-        // "389LD" after sun
         '389LD'.split('').forEach(function (c, i) { lblArr[sunPos + 1 + i] = c; });
         const lblLine = lblArr.join('').trimEnd();
 
-        // Scale caption
         const caption = currentLang === 'fr'
             ? '\u2514\u2500 \u00E9chelle log\u2081\u2080 (LD depuis la Terre)'
             : '\u2514\u2500 log\u2081\u2080 scale (LD from Earth)';
@@ -800,7 +857,7 @@
         diceTypeLabel.style.display = 'none';
 
         const hasSrc = DICE_WITH_SPRITES.includes(diceType);
-        const imgSrc = hasSrc ? '/static/sprites/dice/' + currentTheme + '/d' + diceType + '.png' : null;
+        const imgSrc = hasSrc ? '/static/sprites/dice/' + spriteTheme() + '/d' + diceType + '.png' : null;
 
         // Build grid of sprites + individual results
         let html = '<div class="multi-dice-grid">';
@@ -808,7 +865,7 @@
             const res = diceType === 2 ? (roll.result === 2 ? 'ON' : 'OFF') : roll.result;
             html += '<div class="multi-dice-cell">';
             if (imgSrc) {
-                html += '<img class="multi-dice-img" src="' + imgSrc + '" alt="d' + diceType + '">';
+                html += '<img class="multi-dice-img" src="' + imgSrc + '" alt="d' + diceType + ' result ' + res + '">';
             } else {
                 html += '<span class="multi-dice-no-img">d' + diceType + '</span>';
             }
@@ -846,8 +903,10 @@
     function renderHistory() {
         if (rollHistory.length === 0) {
             historyListEl.innerHTML = '<p>' + t('history_empty') + '</p>';
+            if (exportBtn) exportBtn.style.display = 'none';
             return;
         }
+        if (exportBtn) exportBtn.style.display = 'inline-block';
         historyListEl.innerHTML = rollHistory.map(e => {
             const diceStr = e.count > 1 ? e.count + 'd' + e.diceType : 'd' + e.diceType;
             let resultStr;
@@ -865,6 +924,26 @@
                 ' | <span class="hist-neo">' + e.neoName + '</span></p>'
             );
         }).join('');
+    }
+
+    // ─────────────────────────────────────────
+    //  EXPORT CSV (A2)
+    // ─────────────────────────────────────────
+    function exportHistoryCSV() {
+        if (rollHistory.length === 0) return;
+        var header = 'time,dice,count,results,sum,neo';
+        var lines = rollHistory.map(function (e) {
+            return e.time + ',d' + e.diceType + ',' + e.count + ',' +
+                   e.results.join(';') + ',' + e.sum + ',' + e.neoName;
+        });
+        var csv = header + '\n' + lines.join('\n');
+        var blob = new Blob([csv], { type: 'text/csv' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'spacedice-' + Date.now() + '.csv';
+        a.click();
+        URL.revokeObjectURL(url);
     }
 
     // ─────────────────────────────────────────
@@ -889,8 +968,27 @@
     }
 
     // ─────────────────────────────────────────
-    //  STATISTICS — CHI-SQUARE
+    //  STATISTICS — CHI-SQUARE + EXTENDED (A9)
     // ─────────────────────────────────────────
+    function trackStreak(rolls, diceType) {
+        if (!streakTracker[diceType]) {
+            streakTracker[diceType] = { current: 0, currentFace: 0, max: 0, maxFace: 0 };
+        }
+        var s = streakTracker[diceType];
+        rolls.forEach(function (r) {
+            if (r.result === s.currentFace) {
+                s.current++;
+            } else {
+                s.currentFace = r.result;
+                s.current = 1;
+            }
+            if (s.current > s.max) {
+                s.max = s.current;
+                s.maxFace = s.currentFace;
+            }
+        });
+    }
+
     function recordRolls(rolls, diceType) {
         if (!rollStats[diceType]) {
             rollStats[diceType] = { _total: 0 };
@@ -900,6 +998,7 @@
             rollStats[diceType][result] = (rollStats[diceType][result] || 0) + 1;
             rollStats[diceType]._total++;
         });
+        trackStreak(rolls, diceType);
         updateAnalysisStatus();
     }
 
@@ -956,6 +1055,26 @@
         return x < a+1 ? 1 - gammaSeries(a, x) : gammaCF(a, x);
     }
 
+    function buildHeatmap(stats, diceType) {
+        var total = stats._total;
+        var maxCount = 0;
+        for (var f = 1; f <= diceType; f++) {
+            if ((stats[f] || 0) > maxCount) maxCount = stats[f] || 0;
+        }
+        var barWidth = 20;
+        var lines = [];
+        for (var f = 1; f <= diceType; f++) {
+            var count = stats[f] || 0;
+            var pct = total > 0 ? (count / total * 100) : 0;
+            var filled = maxCount > 0 ? Math.round(count / maxCount * barWidth) : 0;
+            var bar = '\u2588'.repeat(filled) + '\u2591'.repeat(barWidth - filled);
+            var label = String(f).padStart(3, ' ');
+            var tag = count === maxCount && count > 0 ? ' \u2190 max' : '';
+            lines.push('  ' + label + ' ' + bar + ' ' + String(count).padStart(4, ' ') + '  (' + pct.toFixed(1) + '%)' + tag);
+        }
+        return lines.join('\n');
+    }
+
     function runChiSquare() {
         const stats = rollStats[currentDice];
         if (!stats) return;
@@ -967,6 +1086,23 @@
         }
         const df = currentDice - 1, pValue = chiSquarePValue(chi2, df);
         const uniform = pValue >= 0.05;
+
+        // Standard deviation of observed counts
+        var counts = [];
+        for (var f = 1; f <= currentDice; f++) counts.push(stats[f] || 0);
+        var mean = total / currentDice;
+        var variance = counts.reduce(function (s, c) { return s + Math.pow(c - mean, 2); }, 0) / currentDice;
+        var stddev = Math.sqrt(variance);
+
+        // Streak info
+        var sk = streakTracker[currentDice];
+        var streakHtml = sk && sk.max > 1
+            ? '<p>' + t('analyse_streak', { n: sk.max, f: sk.maxFace }) + '</p>'
+            : '';
+
+        // Heatmap
+        var heatmap = buildHeatmap(stats, currentDice);
+
         analysisResultsEl.style.display = 'block';
         analysisResultsEl.innerHTML =
             '<p>' + t('analyse_chi2', { v: chi2.toFixed(4) }) + '</p>' +
@@ -974,6 +1110,10 @@
             '<p>' + t('analyse_pval', { v: pValue.toFixed(4) }) + '</p>' +
             '<p class="' + (uniform ? 'hazardous-no' : 'hazardous-yes') + '">' +
                 t(uniform ? 'analyse_ok' : 'analyse_nok') + '</p>' +
+            '<p>' + t('analyse_stddev', { v: stddev.toFixed(2) }) + '</p>' +
+            streakHtml +
+            '<p>' + t('analyse_heatmap') + '</p>' +
+            '<pre class="heatmap-pre">' + heatmap + '</pre>' +
             '<p class="analysis-note">' + t('analyse_note') + '</p>';
     }
 
@@ -1051,6 +1191,17 @@
     }
 
     // ─────────────────────────────────────────
+    //  PWA SERVICE WORKER (A1)
+    // ─────────────────────────────────────────
+    function registerSW() {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/static/sw.js').catch(function () {
+                // SW registration failed — app works fine without it
+            });
+        }
+    }
+
+    // ─────────────────────────────────────────
     //  INIT
     // ─────────────────────────────────────────
     function init() {
@@ -1073,6 +1224,14 @@
         countPlusBtn.addEventListener('click',  () => setDiceCount(diceCount + 1));
         analyseBtnEl.addEventListener('click', runChiSquare);
 
+        // A2: Export CSV
+        if (exportBtn) exportBtn.addEventListener('click', exportHistoryCSV);
+
+        // A5: Custom theme
+        if (customApplyBtn) customApplyBtn.addEventListener('click', handleCustomApply);
+        if (customResetBtn) customResetBtn.addEventListener('click', resetCustomColors);
+
+        // A3: Space/Enter to re-roll same dice
         document.addEventListener('keydown', e => {
             if (e.code === 'Space' || e.code === 'Enter') { e.preventDefault(); handleRoll(); }
         });
@@ -1089,6 +1248,9 @@
 
         updateAnalysisStatus();
         renderDataStatus();
+
+        // Register Service Worker for offline support
+        registerSW();
     }
 
     if (document.readyState === 'loading') {

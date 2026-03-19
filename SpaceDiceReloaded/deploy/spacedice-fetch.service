@@ -1,0 +1,18 @@
+[Unit]
+Description=SpaceDice NASA NEO daily fetch
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=spacedice
+Group=spacedice
+WorkingDirectory=/opt/spacedice
+EnvironmentFile=/opt/spacedice/.env
+ExecStart=/opt/spacedice/.venv/bin/python scripts/fetch_nasa.py
+
+# Hardening
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/opt/spacedice/data
+NoNewPrivileges=true

@@ -104,6 +104,23 @@ SpaceDiceReloaded/
 
 ---
 
+## API Endpoints
+
+| Endpoint | Méthode | Description |
+|----------|---------|-------------|
+| `/` | GET | Page principale (SPA + données NEO inline) |
+| `/api/neos` | GET | NEOs au format JSON |
+| `/health` | GET | Health check (status + neo_count) |
+
+**Paramètres `/api/neos` :**
+
+| Paramètre | Valeurs | Défaut | Description |
+|-----------|---------|--------|-------------|
+| `range` | `today`, `week`, `month`, `thisyear`, `all` | `month` | Fenêtre temporelle |
+| `limit` | `1`–`500` | `500` | Nombre max de résultats |
+
+---
+
 ## Variables d'environnement
 
 | Variable | Défaut | Description |

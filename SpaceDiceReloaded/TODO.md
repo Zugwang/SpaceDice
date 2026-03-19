@@ -98,7 +98,7 @@ function playRollSound(diceType, result) {
 ## AMÉLIORATIONS SOUHAITÉES
 
 ### A1 · Progressive Web App (PWA)
-**Fichiers :** `templates/index.html`, nouveau `static/sw.js`, nouveau `static/manifest.json`
+**Priorité :** Moyenne · **Fichiers :** `templates/index.html`, nouveau `static/sw.js`, nouveau `static/manifest.json`
 
 **Description :** Service Worker pour cache offline + manifest pour installation.
 
@@ -132,7 +132,7 @@ self.addEventListener('fetch', e => e.respondWith(
 ---
 
 ### A2 · Export de l'historique
-**Fichiers :** `static/js/app.js`
+**Priorité :** Basse · **Fichiers :** `static/js/app.js`
 
 **Description :** Bouton pour télécharger l'historique de session en CSV ou JSON.
 
@@ -153,7 +153,7 @@ function exportHistory() {
 ---
 
 ### A3 · Mode dé fixe sur relance
-**Fichiers :** `static/js/app.js`
+**Priorité :** Basse · **Fichiers :** `static/js/app.js`
 
 **Description :** Option pour relancer automatiquement le même dé avec la touche espace ou un double-clic.
 
@@ -164,7 +164,7 @@ function exportHistory() {
 ---
 
 ### A4 · Affichage 3D de l'orbite (ASCII isométrique)
-**Fichiers :** `static/js/app.js` (`renderOrbit2D`)
+**Priorité :** Basse · **Fichiers :** `static/js/app.js` (`renderOrbit2D`)
 
 **Description :** Vue isométrique de l'orbite NEO au lieu de la vue top-down 2D actuelle. Montrer l'inclinaison orbitale (inclination angle disponible depuis l'API NASA si demandé).
 
@@ -186,7 +186,7 @@ Utiliser la distance_lunar comme rayon et l'inclinaison si disponible.
 ---
 
 ### A5 · Thème personnalisé
-**Fichiers :** `static/css/style.css`, `static/js/app.js`
+**Priorité :** Basse · **Fichiers :** `static/css/style.css`, `static/js/app.js`
 
 **Description :** Permettre à l'utilisateur de choisir ses couleurs via un color picker et sauvegarder le thème personnalisé en localStorage.
 
@@ -195,6 +195,91 @@ Utiliser la distance_lunar comme rayon et l'inclinaison si disponible.
 // Modifier les variables CSS directement :
 document.documentElement.style.setProperty('--accent-primary', '#ff0000');
 // Sauvegarder un objet {name: 'custom', colors: {...}} en localStorage
+```
+
+---
+
+### A6 · Accessibilité (a11y)
+**Priorité :** Moyenne · **Fichiers :** `templates/index.html`, `static/js/app.js`, `static/css/style.css`
+
+**Description :** Rendre le site utilisable au clavier et par lecteurs d'écran.
+
+**Hint :**
+- Ajouter `role="button"` + `aria-label` sur les boutons dés/thème/font/prng
+- `aria-live="polite"` sur la zone résultat (annonce le lancer aux screen readers)
+- Focus visible (outline) sur tous les éléments interactifs — actuellement supprimé par le reset CSS
+- `alt` descriptifs sur les sprites (`<img>` dans multi-dice-grid)
+- Ordre tabindex logique : sélecteur dé → nombre → LANCER → historique
+
+---
+
+### A7 · Favicon + Open Graph meta
+**Priorité :** Moyenne · **Fichiers :** `templates/index.html`, `static/images/`
+
+**Description :** Favicon (sprite d20 redimensionné) + balises `<meta property="og:*">` pour un aperçu correct sur les réseaux sociaux et Discord.
+
+**Hint :**
+```html
+<link rel="icon" type="image/png" sizes="32x32" href="/static/sprites/dice/d20.png">
+<meta property="og:title" content="SpaceDice Reloaded">
+<meta property="og:description" content="Dés à entropie d'astéroïdes — NASA NEO CSPRNG">
+<meta property="og:image" content="/static/images/og-preview.png">
+```
+Créer `og-preview.png` (1200×630) avec logo + orbite + dé.
+
+---
+
+### A8 · Partage de lancer (URL encodée)
+**Priorité :** Basse · **Fichiers :** `static/js/app.js`
+
+**Description :** Bouton "Partager" qui génère une URL contenant le résultat encodé (dé, résultat, NEO source) — aucun backend requis, tout dans le hash/query string.
+
+**Hint :**
+```javascript
+function shareRoll(roll) {
+    const params = new URLSearchParams({
+        d: roll.diceType, r: roll.result, neo: roll.neoName
+    });
+    const url = `${location.origin}/#roll?${params}`;
+    navigator.clipboard.writeText(url);
+}
+// Au chargement : parser location.hash pour afficher un lancer partagé
+```
+
+---
+
+### A9 · Statistiques étendues (streaks, heatmap)
+**Priorité :** Basse · **Fichiers :** `static/js/app.js`
+
+**Description :** Au-delà du chi-carré : afficher la plus longue série (streak) de même résultat, une heatmap ASCII des fréquences par face, et la déviation standard.
+
+**Hint :**
+```
+Heatmap d6 (250 lancers) :
+  1 ████████████████░░░░  41  (16.4%)
+  2 █████████████████░░░  43  (17.2%)
+  3 ███████████████░░░░░  38  (15.2%)
+  4 ████████████████████  50  (20.0%)  ← max
+  5 ██████████████░░░░░░  36  (14.4%)
+  6 ████████████████░░░░  42  (16.8%)
+  σ = 4.73 · streak max = 4× face 4
+```
+
+---
+
+### A10 · Animations CSS du lancer
+**Priorité :** Basse · **Fichiers :** `static/css/style.css`, `static/js/app.js`
+
+**Description :** Ajouter un shake CSS sur le sprite pendant l'animation et un flash/glow au résultat final, pour renforcer le feedback visuel sans ajouter de dépendance.
+
+**Hint :**
+```css
+@keyframes dice-shake {
+    0%, 100% { transform: translate(0); }
+    25% { transform: translate(-3px, 2px) rotate(-2deg); }
+    75% { transform: translate(3px, -2px) rotate(2deg); }
+}
+.dice-sprite.rolling { animation: dice-shake 80ms infinite; }
 ```
 
 ---
@@ -227,19 +312,129 @@ document.documentElement.style.setProperty('--accent-primary', '#ff0000');
 ## DETTE TECHNIQUE
 
 ### DT1 · Tests d'intégration manquants
-Le fichier `tests/test_rng.py` teste uniquement le PRNG côté Python. Aucun test end-to-end (Selenium/Playwright) ni test de l'intégration JS. Priorité basse.
+**Priorité :** Moyenne
+Le fichier `tests/test_rng.py` teste uniquement le PRNG côté Python. Aucun test end-to-end (Selenium/Playwright) ni test de l'intégration JS. Aucun test des routes Flask, ni de `nasa.py`, ni de `db.py`.
+
+**Couverture manquante :**
+- Routes : `GET /` retourne 200 + JSON inline, `/api/neos?range=today` retourne JSON valide
+- `nasa.py` : `generate_seed()` déterministe, `fetch_neo_date_range()` gestion erreurs API
+- `db.py` : insert/upsert, contrainte unique `(nasa_id, approach_date)`
+- JS (Playwright) : clic LANCER → résultat affiché, changement thème persiste après reload
 
 ### DT2 · Gestion d'erreur NASA API insuffisante
-`nasa.py` → `fetch_neo_data()` lève des exceptions non catchées si l'API retourne une erreur HTTP ou un JSON malformé. Ajouter un `try/except` avec fallback sur les données cachées existantes.
+**Priorité :** Haute
+`nasa.py` → `fetch_neo_date_range()` catch les erreurs par NEO individuellement (`pass` silencieux) mais un timeout réseau ou un 500 API n'est pas rattrapé proprement. Le script `fetch_nasa.py` gère mieux (try/except + continue), mais `nasa.py` importé directement par les routes pourrait crasher le worker Gunicorn.
 
-### DT3 · CSS non minifié en production
-Le `style.css` (~900 lignes) est servi tel quel. Ajouter une étape de minification dans le build Docker (ex. `csso` ou `cleancss`) pour réduire à ~6KB.
+**Fix :** Wrapper `requests.get()` avec retry (exponential backoff, max 3) + fallback sur les données DB existantes si le fetch échoue.
+
+### DT3 · CSS/JS non minifiés en production
+**Priorité :** Basse
+`style.css` (~900 lignes) et `app.js` (~1300 lignes) sont servis tels quels. Ajouter une étape de minification dans le Dockerfile (ex. `csso` + `terser`) pour gagner ~40% de taille.
+
+**Hint Dockerfile :**
+```dockerfile
+RUN npm install -g csso-cli terser && \
+    csso static/css/style.css -o static/css/style.css && \
+    terser static/js/app.js -o static/js/app.js -c -m
+```
 
 ### DT4 · Pas de Content Security Policy (CSP)
+**Priorité :** Haute (sécurité)
 Le header CSP n'est pas configuré dans nginx.conf. Ajouter :
 ```nginx
-add_header Content-Security-Policy "default-src 'self'; font-src 'self'; img-src 'self'; script-src 'self'; style-src 'self';" always;
+add_header Content-Security-Policy "default-src 'self'; font-src 'self'; img-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self';" always;
 ```
+Note : `'unsafe-inline'` nécessaire pour le bloc `<script>` Jinja2 qui injecte `NEO_DATA`. Alternative propre : déplacer les données vers un `<script src>` généré dynamiquement.
+
+### DT5 · Pas de rate limiting sur /api/neos
+**Priorité :** Haute (sécurité/prod)
+L'endpoint `/api/neos?range=all` retourne potentiellement 29 000+ enregistrements sans pagination ni rate limit. Un bot pourrait saturer le serveur.
+
+**Fix nginx :**
+```nginx
+limit_req_zone $binary_remote_addr zone=api:10m rate=10r/m;
+location /api/ { limit_req zone=api burst=5 nodelay; }
+```
+**Fix Flask (pagination) :** Ajouter `?page=1&per_page=100` avec défaut et max 500.
+
+### DT6 · Pas de health check endpoint
+**Priorité :** Moyenne
+Docker Compose et les orchestrateurs (Traefik, etc.) ont besoin d'un endpoint health check pour détecter les pannes.
+
+**Fix :**
+```python
+# app/routes.py
+@bp.route('/health')
+def health():
+    return jsonify({'status': 'ok', 'neo_count': get_neo_count()})
+```
+```yaml
+# docker-compose.yml
+healthcheck:
+  test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+  interval: 30s
+```
+
+### DT7 · Pas de schema migration DB
+**Priorité :** Basse
+La table `neos` est créée par `db.py` avec `CREATE TABLE IF NOT EXISTS`. Si le schéma change (ajout colonne), il n'y a aucun mécanisme de migration. Pour un projet léger, un simple `schema_version` dans une table `meta` + script de migration suffit.
+
+### DT8 · Seeds : perte d'entropie au XOR JS (53-bit → 32-bit)
+**Priorité :** Basse (cosmétique)
+`generate_seed()` produit des entiers sur 53 bits (`int(h, 16) % 2**53`), mais côté JS le XOR des seeds (`nasaSeed ^= neo.seeds[source]`) puis `>>> 0` tronque à 32 bits. Les 21 bits de poids fort sont perdus avant d'entrer dans le PRNG. Pas un problème de sécurité (crypto.getRandomValues apporte les 32 bits d'entropie), mais incohérent avec la promesse de "full precision seeds".
+
+**Fix :** Soit réduire `generate_seed()` à `% 2**32`, soit utiliser `BigInt` côté JS pour le XOR avant la troncation finale.
+
+### DT9 · Logs structurés absents
+**Priorité :** Basse
+Gunicorn log en texte brut. En prod avec Docker, des logs JSON (ex. `gunicorn --access-logformat '%(h)s %(t)s %(r)s %(s)s'` ou `python-json-logger`) facilitent le parsing par ELK/Loki.
+
+### DT10 · Documentation des endpoints API incomplète
+**Priorité :** Basse
+`/api/neos` accepte `range=today|week|thisyear|all|month` mais ce n'est documenté nulle part (ni README, ni SPECS, ni ARCHITECTURE). Le pool date range selector ajouté récemment n'est pas documenté non plus.
+
+---
+
+## DÉPLOIEMENT VPS — CHECKLIST
+
+### P1 · HTTPS (TLS) — 🔴 Bloquant
+`docker-compose.yml` expose 8080:80 en HTTP brut. Deux options :
+- **Traefik** : reverse proxy avec Let's Encrypt auto (recommandé VPS)
+- **Certbot + nginx** : classique, nginx écoute 443 avec certificat
+
+### P2 · .env production — 🔴 Bloquant
+Créer `.env` avec :
+```
+NASA_API_KEY=clé_réelle        # DEMO_KEY = 30 req/h max
+FLASK_ENV=production
+SECRET_KEY=valeur_aléatoire_64chars
+```
+
+### P3 · Cron fetch NASA — 🔴 Bloquant
+Le fetch est manuel. Options :
+- Cron hôte : `0 6 * * * docker exec spacedice poetry run python scripts/fetch_nasa.py`
+- Conteneur scheduler (ofelia) dans le compose
+
+### P4 · nginx server_name — 🟠 Important
+Remplacer `server_name localhost` par le domaine réel : `server_name spacedice.mondomaine.com;`
+
+### P5 · Gunicorn workers — 🟠 Important
+`workers = 2` OK pour 1 vCPU. Pour 2 vCPU : `workers = 3` (formule : 2 × CPU + 1).
+
+### P6 · Cache-busting sprites — 🟡 Mineur
+`expires 7d` pour les statiques. Si les sprites changent (thèmes), le browser garde l'ancien. Passer à `expires 1d` ou ajouter un hash dans le nom de fichier.
+
+### P7 · Logrotate Docker — 🟡 Mineur
+Gunicorn sort en stdout/stderr, Docker capture. Configurer `--log-opt max-size=10m --log-opt max-file=3` dans le compose.
+
+### Ordre de déploiement recommandé
+1. Cloner le repo sur le VPS
+2. Créer `.env` avec `NASA_API_KEY` + `SECRET_KEY`
+3. Modifier `nginx.conf` → `server_name` + port 443
+4. Ajouter Traefik ou Certbot pour TLS
+5. `docker compose up -d`
+6. Fetch initial : `docker exec spacedice python scripts/fetch_nasa.py --init --days 6275`
+7. Configurer le cron quotidien
 
 ---
 

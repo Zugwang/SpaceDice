@@ -1,0 +1,28 @@
+[Unit]
+Description=SpaceDice Reloaded (Gunicorn)
+After=network.target
+Wants=network-online.target
+
+[Service]
+Type=notify
+User=spacedice
+Group=spacedice
+RuntimeDirectory=spacedice
+WorkingDirectory=/opt/spacedice
+EnvironmentFile=/opt/spacedice/.env
+ExecStart=/opt/spacedice/.venv/bin/gunicorn \
+    --config gunicorn.conf.py \
+    "app:create_app()"
+ExecReload=/bin/kill -s HUP $MAINPID
+
+# Hardening
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/opt/spacedice/data /run/spacedice
+NoNewPrivileges=true
+
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

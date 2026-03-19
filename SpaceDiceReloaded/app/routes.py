@@ -6,6 +6,7 @@ from .db import get_neos, get_stats, DB_FILE
 bp = Blueprint('main', __name__)
 
 NEO_WINDOW_DAYS = 30  # entropy pool default: last 30 days of NEOs
+API_MAX_PER_PAGE = 500
 
 
 def _load_data():
@@ -55,19 +56,37 @@ def index():
 
 @bp.route('/api/neos')
 def api_neos():
+    """Return NEOs as JSON.
+
+    Query parameters:
+        range   — time window: today | week | month (default) | thisyear | all
+        limit   — max results (default 500, max 500)
+    """
     range_param = request.args.get('range', '42days')
+    limit = min(int(request.args.get('limit', API_MAX_PER_PAGE)), API_MAX_PER_PAGE)
     today = datetime.now(timezone.utc).date()
 
     if range_param == 'today':
-        neos = get_neos(days=1)
+        neos = get_neos(days=1, limit=limit)
     elif range_param == 'week':
-        neos = get_neos(days=7)
+        neos = get_neos(days=7, limit=limit)
     elif range_param == 'thisyear':
         days_since_jan1 = (today - today.replace(month=1, day=1)).days + 1
-        neos = get_neos(days=days_since_jan1)
+        neos = get_neos(days=days_since_jan1, limit=limit)
     elif range_param == 'all':
-        neos = get_neos(days=None, limit=2000)
+        neos = get_neos(days=None, limit=limit)
     else:  # month
-        neos = get_neos(days=30)
+        neos = get_neos(days=30, limit=limit)
 
     return jsonify(neos)
+
+
+@bp.route('/health')
+def health():
+    """Health check for Docker / monitoring."""
+    stats = get_stats() if DB_FILE.exists() else {}
+    return jsonify({
+        'status': 'ok',
+        'neo_count': stats.get('count', 0),
+        'last_fetch': stats.get('last_fetch'),
+    })

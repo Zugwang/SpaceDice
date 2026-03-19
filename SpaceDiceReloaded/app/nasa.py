@@ -2,9 +2,15 @@
 
 import os
 import hashlib
+import logging
+import time
+
 import requests
 
+log = logging.getLogger(__name__)
+
 NEOWS_FEED_URL = "https://api.nasa.gov/neo/rest/v1/feed"
+_MAX_RETRIES = 3
 
 
 def _api_key() -> str:
@@ -12,9 +18,9 @@ def _api_key() -> str:
 
 
 def generate_seed(value: str) -> int:
-    """Hash any string to a JS-safe integer seed (< 2^53)."""
+    """Hash any string to a uint32 seed (matches JS bitwise ops)."""
     digest = hashlib.sha256(value.encode()).hexdigest()
-    return int(digest, 16) % (2 ** 53)
+    return int(digest, 16) % (2 ** 32)
 
 
 def _parse_neo(neo: dict, approach_date: str) -> dict:
@@ -53,7 +59,7 @@ def _parse_neo(neo: dict, approach_date: str) -> dict:
 
 def fetch_neo_date_range(start_date: str, end_date: str) -> list:
     """
-    Fetch and parse NEOs for a date range.
+    Fetch and parse NEOs for a date range with retry on failure.
     NASA API limit: max 7 days per request.
     start_date / end_date: 'YYYY-MM-DD'
     """
@@ -62,9 +68,23 @@ def fetch_neo_date_range(start_date: str, end_date: str) -> list:
         f"?start_date={start_date}&end_date={end_date}"
         f"&api_key={_api_key()}"
     )
-    response = requests.get(url, timeout=30)
-    response.raise_for_status()
-    data = response.json()
+
+    last_exc = None
+    for attempt in range(_MAX_RETRIES):
+        try:
+            response = requests.get(url, timeout=30)
+            response.raise_for_status()
+            data = response.json()
+            break
+        except (requests.RequestException, ValueError) as exc:
+            last_exc = exc
+            wait = 2 ** attempt
+            log.warning("NASA API attempt %d/%d failed: %s — retrying in %ds",
+                        attempt + 1, _MAX_RETRIES, exc, wait)
+            time.sleep(wait)
+    else:
+        log.error("NASA API failed after %d attempts: %s", _MAX_RETRIES, last_exc)
+        return []
 
     neos = []
     for date_key, neo_list in data.get('near_earth_objects', {}).items():
