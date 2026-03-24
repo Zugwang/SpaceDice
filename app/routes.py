@@ -1,0 +1,93 @@
+import os
+from datetime import datetime, timezone, timedelta
+from flask import Blueprint, render_template, jsonify, request
+from .db import get_neos, get_stats, DB_FILE
+
+bp = Blueprint('main', __name__)
+
+NEO_WINDOW_DAYS = 30  # entropy pool default: last 30 days of NEOs
+API_MAX_PER_PAGE = 500
+
+
+def _load_data():
+    api_key = os.getenv('NASA_API_KEY', 'DEMO_KEY')
+    is_demo = (not api_key or api_key == 'DEMO_KEY')
+
+    if not DB_FILE.exists():
+        return [], {
+            'is_demo_key': is_demo,
+            'neo_count': 0,
+            'is_fresh': False,
+            'oldest_date': None,
+            'newest_date': None,
+            'last_fetch': None,
+            'db_active': False,
+        }
+
+    neos = get_neos(days=NEO_WINDOW_DAYS)
+    stats = get_stats()
+
+    is_fresh = False
+    if stats['last_fetch']:
+        try:
+            dt = datetime.fromisoformat(stats['last_fetch'])
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=timezone.utc)
+            is_fresh = (datetime.now(timezone.utc) - dt) < timedelta(days=2)
+        except (ValueError, TypeError):
+            pass
+
+    return neos, {
+        'is_demo_key': is_demo,
+        'neo_count': len(neos),
+        'is_fresh': is_fresh,
+        'oldest_date': stats['oldest'],
+        'newest_date': stats['newest'],
+        'last_fetch': stats['last_fetch'],
+        'recent_count': stats.get('recent_count', 0),
+        'db_active': True,
+    }
+
+
+@bp.route('/')
+def index():
+    neo_data, data_meta = _load_data()
+    return render_template('index.html', neo_data=neo_data, data_meta=data_meta)
+
+
+@bp.route('/api/neos')
+def api_neos():
+    """Return NEOs as JSON.
+
+    Query parameters:
+        range   — time window: today | week | month (default) | thisyear | all
+        limit   — max results (default 500, max 500)
+    """
+    range_param = request.args.get('range', '42days')
+    limit = min(int(request.args.get('limit', API_MAX_PER_PAGE)), API_MAX_PER_PAGE)
+    today = datetime.now(timezone.utc).date()
+
+    if range_param == 'today':
+        neos = get_neos(days=1, limit=limit)
+    elif range_param == 'week':
+        neos = get_neos(days=7, limit=limit)
+    elif range_param == 'thisyear':
+        days_since_jan1 = (today - today.replace(month=1, day=1)).days + 1
+        neos = get_neos(days=days_since_jan1, limit=limit)
+    elif range_param == 'all':
+        neos = get_neos(days=None, limit=limit)
+    else:  # month
+        neos = get_neos(days=30, limit=limit)
+
+    return jsonify(neos)
+
+
+@bp.route('/health')
+def health():
+    """Health check for Docker / monitoring."""
+    stats = get_stats() if DB_FILE.exists() else {}
+    return jsonify({
+        'status': 'ok',
+        'neo_count': stats.get('count', 0),
+        'last_fetch': stats.get('last_fetch'),
+    })

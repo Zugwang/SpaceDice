@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpaceDice Reloaded</title>
+    <meta name="description" content="Asteroid Entropy Dice Roller — NASA NEO CSPRNG">
+
+    <!-- Open Graph / Social -->
+    <meta property="og:title" content="SpaceDice Reloaded">
+    <meta property="og:description" content="Dés à entropie d'astéroïdes — NASA NEO × CSPRNG">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="{{ url_for('static', filename='sprites/dice/terminal/d20.png') }}">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='sprites/dice/terminal/d20.png') }}">
+
+    <!-- PWA manifest -->
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <meta name="theme-color" content="#00ff41">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=3">
+    <!-- Preload selectable fonts — NerdFont collection -->
+    <link rel="preload" href="{{ url_for('static', filename='fonts/silkscreen-400.woff2') }}"         as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="{{ url_for('static', filename='fonts/bigblue-terminal-400.woff2') }}"   as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="{{ url_for('static', filename='fonts/comic-shanns-mono-400.woff2') }}"  as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="{{ url_for('static', filename='fonts/dejavu-sans-mono-400.woff2') }}"   as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="{{ url_for('static', filename='fonts/heavy-data-400.woff2') }}"         as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="{{ url_for('static', filename='fonts/open-dyslexic-400.woff2') }}"      as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="{{ url_for('static', filename='fonts/symbols-nerd-400.woff2') }}"       as="font" type="font/woff2" crossorigin>
+</head>
+<body>
+    <div class="container" role="main">
+
+        <!-- ===== HEADER ===== -->
+        <header class="header">
+            <div class="header-title">
+                <h1 class="title" data-i18n="title">SPACE DICE</h1>
+                <p class="subtitle" data-i18n="subtitle">Dés à Entropie d'Astéroïdes</p>
+            </div>
+            <nav class="header-controls" aria-label="Settings">
+                <div class="theme-selector" role="group" aria-label="Theme">
+                    <span class="control-label" data-i18n="theme_label">Thème:</span>
+                    <button class="theme-btn" data-theme="original">ORIGINAL</button>
+                    <button class="theme-btn" data-theme="oneshot">ONESHOT</button>
+                    <button class="theme-btn active" data-theme="terminal">TERMINAL</button>
+                    <button class="theme-btn" data-theme="solarized">SOLARIZED</button>
+                </div>
+                <div class="lang-selector" role="group" aria-label="Language">
+                    <span class="control-label" data-i18n="lang_label">Langue:</span>
+                    <button class="lang-btn active" data-lang="fr">FR</button>
+                    <button class="lang-btn" data-lang="en">EN</button>
+                </div>
+                <div class="font-selector" role="group" aria-label="Font">
+                    <span class="control-label" data-i18n="font_label">Police:</span>
+                    <button class="font-btn active" data-font="bigblue"   title="BigBlue Terminal — DOS CP437">DOS</button>
+                    <button class="font-btn"        data-font="comic"     title="Comic Shanns Mono — fun coding">COMIC</button>
+                    <button class="font-btn"        data-font="dejavu"    title="DejaVu Sans Mono — clean Unicode">DEJAVU</button>
+                    <button class="font-btn"        data-font="heavydata" title="Heavy Data — bold data display">HEAVY</button>
+                    <button class="font-btn"        data-font="dyslexic"  title="OpenDyslexic — police dyslexie">DYS</button>
+                    <button class="font-btn"        data-font="symbols"   title="Symbols Nerd Font — ???">???</button>
+                </div>
+            </nav>
+        </header>
+
+        <!-- ===== INFO PANEL ===== -->
+        <section class="info-panel">
+            <div class="entropy-source">
+                <h2 class="section-title" data-i18n="entropy_source">> SOURCE D'ENTROPIE</h2>
+
+                <!-- NEO data display -->
+                <div id="neo-data" class="terminal-output ascii-font" aria-live="polite">
+                    <p data-i18n="awaiting">> EN ATTENTE DE LANCER...</p>
+                </div>
+
+                <!-- Seed source selector (which NASA field feeds the seed) -->
+                <div class="entropy-selector" role="group" aria-label="Seed source">
+                    <span class="entropy-label" data-i18n="seed_label">SEED:</span>
+                    <button class="entropy-btn" data-source="diameter">DIAM</button>
+                    <button class="entropy-btn" data-source="velocity">VEL</button>
+                    <button class="entropy-btn" data-source="distance">DIST</button>
+                    <button class="entropy-btn active" data-source="combined">COMB</button>
+                </div>
+
+                <!-- NEO date range selector (which time window feeds the pool) -->
+                <div class="range-selector" role="group" aria-label="Pool range">
+                    <span class="entropy-label">POOL:</span>
+                    <button class="range-btn" data-range="today">TODAY</button>
+                    <button class="range-btn" data-range="week">WEEK</button>
+                    <button class="range-btn active" data-range="month">MONTH</button>
+                    <button class="range-btn" data-range="thisyear">YEAR</button>
+                    <button class="range-btn" data-range="all">ALL</button>
+                </div>
+
+                <!-- PRNG algorithm selector -->
+                <div class="prng-selector" role="group" aria-label="PRNG algorithm">
+                    <span class="entropy-label" data-i18n="prng_label">ALGO:</span>
+                    <button class="prng-btn active" data-algo="xor">XOR</button>
+                    <button class="prng-btn" data-algo="lcg">LCG</button>
+                    <button class="prng-btn" data-algo="xorshift">XORSHIFT</button>
+                    <button class="prng-btn" data-algo="murmur">MURMUR3</button>
+                </div>
+
+                <!-- Active PRNG description + Wikipedia link -->
+                <div id="prng-info" class="prng-info ascii-font"></div>
+            </div>
+
+            <div class="api-info">
+                <h2 class="section-title" data-i18n="nasa_api">NASA NEO API</h2>
+                <div class="terminal-output ascii-font" id="api-info-text">
+                    <!-- filled by JS based on language -->
+                </div>
+                <!-- 2D orbit display (moved here) -->
+                <div id="orbit-display" class="orbit-display ascii-font" aria-hidden="true"></div>
+            </div>
+        </section>
+
+        <!-- ===== MAIN: DICE SELECTOR + ROLL ===== -->
+        <main class="main">
+            <section class="dice-selector">
+                <h2 class="section-title" data-i18n="select_dice">> SÉLECTIONNER LE DÉ</h2>
+                <div class="dice-grid" role="group" aria-label="Dice type">
+                    <button class="dice-btn" data-dice="2" aria-label="d2">d2</button>
+                    <button class="dice-btn" data-dice="3" aria-label="d3">d3</button>
+                    <button class="dice-btn" data-dice="4" aria-label="d4">d4</button>
+                    <button class="dice-btn active" data-dice="6" aria-label="d6">d6</button>
+                    <button class="dice-btn" data-dice="8" aria-label="d8">d8</button>
+                    <button class="dice-btn" data-dice="10" aria-label="d10">d10</button>
+                    <button class="dice-btn" data-dice="12" aria-label="d12">d12</button>
+                    <button class="dice-btn" data-dice="20" aria-label="d20">d20</button>
+                    <button class="dice-btn" data-dice="100" aria-label="d100">d100</button>
+                    <button class="dice-btn dice-btn-random" data-dice="random" aria-label="Random dice">d?</button>
+                </div>
+                <div class="dice-count-selector" role="group" aria-label="Dice count">
+                    <span class="control-label" data-i18n="dice_count">NOMBRE:</span>
+                    <button class="count-btn" id="count-minus" disabled aria-label="Decrease count">−</button>
+                    <span id="count-display" class="count-display" aria-live="polite">1</span>
+                    <button class="count-btn" id="count-plus" aria-label="Increase count">+</button>
+                    <button class="rpg-mode-btn" id="rpg-mode-btn" data-i18n="rpg_mode">[ MODE JDR ]</button>
+                </div>
+            </section>
+
+            <!-- ===== RPG PANEL (hidden by default) ===== -->
+            <section class="rpg-panel" id="rpg-panel" style="display:none">
+                <div class="rpg-help ascii-font" id="rpg-help">
+                    <p><strong>2d6+4</strong> · <strong>4d6k3</strong> (keep 3) · <strong>1d20+5</strong></p>
+                    <p>ADV/DIS → 2d20, <span data-i18n="rpg_help_keep">garde max/min</span></p>
+                </div>
+                <div class="rpg-input-row">
+                    <input type="text" id="rpg-formula" class="rpg-formula" placeholder="2d6+4" spellcheck="false" autocomplete="off">
+                    <button class="rpg-adv-btn" id="rpg-adv" title="Advantage">ADV</button>
+                    <button class="rpg-adv-btn" id="rpg-dis" title="Disadvantage">DIS</button>
+                    <button class="rpg-roll-btn" id="rpg-roll-btn" data-i18n="roll">[ LANCER ]</button>
+                </div>
+                <div id="rpg-result" class="rpg-result ascii-font" aria-live="polite"></div>
+            </section>
+
+            <section class="roll-zone">
+                <div class="result-display">
+                    <div class="dice-sprite" id="dice-sprite">
+                        <img src="{{ url_for('static', filename='sprites/dice/terminal/d6.png') }}" alt="d6 dice" id="dice-img">
+                    </div>
+                    <!-- Canvas renders result in pixel art (no text chars) -->
+                    <canvas id="result-canvas" class="result-canvas" aria-label="Roll result" role="img"></canvas>
+                    <span id="dice-type-label" class="dice-type-label">d6</span>
+                </div>
+                <div id="multi-roll-results" class="multi-roll-results ascii-font" aria-live="polite"></div>
+                <button id="roll-btn" class="roll-btn" data-i18n="roll" aria-label="Roll dice">[ LANCER ]</button>
+            </section>
+        </main>
+
+        <!-- ===== HISTORY ===== -->
+        <section class="history-panel">
+            <div class="history-header">
+                <h2 class="section-title" data-i18n="history_title">> HISTORIQUE DES LANCERS</h2>
+                <button id="export-btn" class="export-btn" title="Export CSV" aria-label="Export history as CSV" style="display:none">[ CSV ]</button>
+            </div>
+            <div id="history-list" class="terminal-output history-list ascii-font" aria-live="polite">
+                <p data-i18n="history_empty">> AUCUN LANCER ENCORE</p>
+            </div>
+        </section>
+
+        <!-- ===== STATISTICAL ANALYSIS ===== -->
+        <section class="analysis-panel">
+            <h2 class="section-title" data-i18n="analyse_title">> ANALYSE STATISTIQUE</h2>
+            <div id="analysis-status" class="terminal-output ascii-font" aria-live="polite"></div>
+            <button id="analyse-btn" class="analyse-btn" data-i18n="analyse_btn" style="display:none">[ ANALYSER ]</button>
+            <div id="analysis-results" class="terminal-output analysis-results ascii-font" style="display:none"></div>
+        </section>
+
+        <!-- ===== THEME CUSTOMIZER (A5) ===== -->
+        <section class="customizer-panel" id="customizer-panel" style="display:none">
+            <h2 class="section-title" data-i18n="custom_title">> THÈME PERSONNALISÉ</h2>
+            <div class="customizer-grid">
+                <label class="customizer-item">
+                    <span data-i18n="custom_accent">Accent</span>
+                    <input type="color" id="custom-accent" value="#00ff41">
+                </label>
+                <label class="customizer-item">
+                    <span data-i18n="custom_highlight">Highlight</span>
+                    <input type="color" id="custom-highlight" value="#f4d03f">
+                </label>
+                <label class="customizer-item">
+                    <span data-i18n="custom_bg">Background</span>
+                    <input type="color" id="custom-bg" value="#0a0a12">
+                </label>
+                <button id="custom-apply" class="analyse-btn" data-i18n="custom_apply">[ APPLIQUER ]</button>
+                <button id="custom-reset" class="analyse-btn" data-i18n="custom_reset">[ RESET ]</button>
+            </div>
+        </section>
+
+        <footer class="footer">
+            <p id="footer-line" data-i18n="footer_line1"></p>
+        </footer>
+    </div>
+
+    <script>
+        let NEO_DATA    = {{ neo_data  | tojson }};
+        const DATA_META = {{ data_meta | tojson }};
+    </script>
+    <script src="{{ url_for('static', filename='js/app.js') }}?v=3"></script>
+</body>
+</html>
