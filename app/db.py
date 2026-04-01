@@ -127,7 +127,7 @@ def get_stats() -> dict:
             FROM neos
         """).fetchone()
         recent = conn.execute(
-            "SELECT COUNT(*) FROM neos WHERE approach_date >= date('now', '-1 day')"
+            "SELECT COUNT(*) FROM neos WHERE approach_date = date('now')"
         ).fetchone()[0]
     d = dict(row) if row else {'count': 0, 'oldest': None, 'newest': None, 'last_fetch': None}
     d['recent_count'] = recent

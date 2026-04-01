@@ -12,22 +12,23 @@
     <meta property="og:type" content="website">
     <meta property="og:image" content="{{ url_for('static', filename='sprites/dice/terminal/d20.png') }}">
 
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='sprites/dice/terminal/d20.png') }}">
+    <!-- Favicon (updated dynamically by setTheme) -->
+    <link rel="icon" type="image/png" sizes="32x32" id="favicon" href="{{ url_for('static', filename='sprites/dice/terminal/d20.png') }}">
+    <!-- Expose static base path for JS (works on /beta/ too) -->
+    <script>window._staticBase = "{{ url_for('static', filename='') }}";</script>
 
     <!-- PWA manifest -->
     <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
     <meta name="theme-color" content="#00ff41">
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=3">
-    <!-- Preload selectable fonts — NerdFont collection -->
-    <link rel="preload" href="{{ url_for('static', filename='fonts/silkscreen-400.woff2') }}"         as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="{{ url_for('static', filename='fonts/bigblue-terminal-400.woff2') }}"   as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="{{ url_for('static', filename='fonts/comic-shanns-mono-400.woff2') }}"  as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="{{ url_for('static', filename='fonts/dejavu-sans-mono-400.woff2') }}"   as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="{{ url_for('static', filename='fonts/heavy-data-400.woff2') }}"         as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="{{ url_for('static', filename='fonts/open-dyslexic-400.woff2') }}"      as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="{{ url_for('static', filename='fonts/symbols-nerd-400.woff2') }}"       as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=12">
+    <!-- Preload selectable fonts -->
+    <link rel="preload" href="{{ url_for('static', filename='fonts/silkscreen-400.woff2') }}"        as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="{{ url_for('static', filename='fonts/dejavu-sans-mono-400.woff2') }}"  as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="{{ url_for('static', filename='fonts/minecraft-400.woff2') }}"         as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="{{ url_for('static', filename='fonts/comic-shanns-mono-400.woff2') }}" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="{{ url_for('static', filename='fonts/open-dyslexic-400.woff2') }}"     as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="{{ url_for('static', filename='fonts/symbols-nerd-400.woff2') }}"      as="font" type="font/woff2" crossorigin>
 </head>
 <body>
     <div class="container" role="main">
@@ -41,9 +42,9 @@
             <nav class="header-controls" aria-label="Settings">
                 <div class="theme-selector" role="group" aria-label="Theme">
                     <span class="control-label" data-i18n="theme_label">Thème:</span>
-                    <button class="theme-btn" data-theme="original">ORIGINAL</button>
+                    <button class="theme-btn active" data-theme="original">ORIGINAL</button>
                     <button class="theme-btn" data-theme="oneshot">ONESHOT</button>
-                    <button class="theme-btn active" data-theme="terminal">TERMINAL</button>
+                    <button class="theme-btn" data-theme="terminal">TERMINAL</button>
                     <button class="theme-btn" data-theme="solarized">SOLARIZED</button>
                 </div>
                 <div class="lang-selector" role="group" aria-label="Language">
@@ -53,12 +54,11 @@
                 </div>
                 <div class="font-selector" role="group" aria-label="Font">
                     <span class="control-label" data-i18n="font_label">Police:</span>
-                    <button class="font-btn active" data-font="bigblue"   title="BigBlue Terminal — DOS CP437">DOS</button>
-                    <button class="font-btn"        data-font="comic"     title="Comic Shanns Mono — fun coding">COMIC</button>
-                    <button class="font-btn"        data-font="dejavu"    title="DejaVu Sans Mono — clean Unicode">DEJAVU</button>
-                    <button class="font-btn"        data-font="heavydata" title="Heavy Data — bold data display">HEAVY</button>
-                    <button class="font-btn"        data-font="dyslexic"  title="OpenDyslexic — police dyslexie">DYS</button>
-                    <button class="font-btn"        data-font="symbols"   title="Symbols Nerd Font — ???">???</button>
+                    <button class="font-btn active" data-font="dejavu"   title="DejaVu Sans Mono — Unicode">DEJAVU</button>
+                    <button class="font-btn"        data-font="craft"    title="Minecraft — pixel font">CRAFT</button>
+                    <button class="font-btn"        data-font="comic"    title="Comic Shanns Mono — fun coding">COMIC</button>
+                    <button class="font-btn"        data-font="dyslexic" title="OpenDyslexic — police dyslexie">DYS</button>
+                    <button class="font-btn"        data-font="symbols"  title="Symbols Nerd Font — ???">???</button>
                 </div>
             </nav>
         </header>
@@ -73,21 +73,29 @@
                     <p data-i18n="awaiting">> EN ATTENTE DE LANCER...</p>
                 </div>
 
-                <!-- Seed source selector (which NASA field feeds the seed) -->
-                <div class="entropy-selector" role="group" aria-label="Seed source">
+                <!-- Seed source -->
+                <div class="entropy-selector seed-row" role="group" aria-label="Seed source">
                     <span class="entropy-label" data-i18n="seed_label">SEED:</span>
-                    <button class="entropy-btn" data-source="diameter">DIAM</button>
                     <button class="entropy-btn" data-source="velocity">VEL</button>
+                    <button class="entropy-btn" data-source="diameter">DIAM</button>
                     <button class="entropy-btn" data-source="distance">DIST</button>
                     <button class="entropy-btn active" data-source="combined">COMB</button>
+                </div>
+
+                <!-- Hash mode -->
+                <div class="hash-selector" role="group" aria-label="Seed mode">
+                    <span class="entropy-label" data-i18n="hash_label">HASH:</span>
+                    <button class="hash-btn" data-hash="raw" title="Chiffres décimaux bruts — aucun hash">RAW</button>
+                    <button class="hash-btn active" data-hash="sha256" title="SHA-256 hash">SHA-256</button>
+                    <button class="hash-btn" data-hash="blake3" title="BLAKE3 hash (pur JS)">BLAKE3</button>
                 </div>
 
                 <!-- NEO date range selector (which time window feeds the pool) -->
                 <div class="range-selector" role="group" aria-label="Pool range">
                     <span class="entropy-label">POOL:</span>
-                    <button class="range-btn" data-range="today">TODAY</button>
+                    <button class="range-btn active" data-range="today">24H</button>
                     <button class="range-btn" data-range="week">WEEK</button>
-                    <button class="range-btn active" data-range="month">MONTH</button>
+                    <button class="range-btn" data-range="month">MONTH</button>
                     <button class="range-btn" data-range="thisyear">YEAR</button>
                     <button class="range-btn" data-range="all">ALL</button>
                 </div>
@@ -95,10 +103,10 @@
                 <!-- PRNG algorithm selector -->
                 <div class="prng-selector" role="group" aria-label="PRNG algorithm">
                     <span class="entropy-label" data-i18n="prng_label">ALGO:</span>
-                    <button class="prng-btn active" data-algo="xor">XOR</button>
+                    <button class="prng-btn" data-algo="xor">XOR</button>
                     <button class="prng-btn" data-algo="lcg">LCG</button>
                     <button class="prng-btn" data-algo="xorshift">XORSHIFT</button>
-                    <button class="prng-btn" data-algo="murmur">MURMUR3</button>
+                    <button class="prng-btn active" data-algo="murmur">MURMUR3</button>
                 </div>
 
                 <!-- Active PRNG description + Wikipedia link -->
@@ -136,6 +144,11 @@
                     <button class="count-btn" id="count-minus" disabled aria-label="Decrease count">−</button>
                     <span id="count-display" class="count-display" aria-live="polite">1</span>
                     <button class="count-btn" id="count-plus" aria-label="Increase count">+</button>
+                    <div class="zero-selector" role="group" aria-label="Zero range">
+                        <span class="zero-label" data-i18n="zero_label">ZERO</span>
+                        <button class="zero-btn" id="zero-incl" data-zero="incl" data-i18n="zero_incl">INCLU</button>
+                        <button class="zero-btn active" id="zero-excl" data-zero="excl" data-i18n="zero_excl">EXCLU</button>
+                    </div>
                     <button class="rpg-mode-btn" id="rpg-mode-btn" data-i18n="rpg_mode">[ MODE JDR ]</button>
                 </div>
             </section>
@@ -218,6 +231,6 @@
         let NEO_DATA    = {{ neo_data  | tojson }};
         const DATA_META = {{ data_meta | tojson }};
     </script>
-    <script src="{{ url_for('static', filename='js/app.js') }}?v=3"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}?v=12"></script>
 </body>
 </html>
